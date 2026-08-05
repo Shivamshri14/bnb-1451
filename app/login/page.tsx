@@ -6,11 +6,11 @@ import * as z from "zod";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
-  loginAction,
   sendResetOtpAction,
   verifyResetOtpAction,
   resetPasswordAction,
 } from "@/actions/auth";
+import { signIn } from "next-auth/react";
 import { toast } from "sonner";
 import {
   Loader2,
@@ -67,28 +67,21 @@ export default function LoginPage() {
     setErrorMsg(null);
     startTransition(async () => {
       try {
-        const formData = new FormData();
-        formData.append("username", data.username);
-        formData.append("password", data.password);
-        const response = await loginAction(formData);
-        if (response?.error) {
-          setErrorMsg(response.error);
-          toast.error(response.error);
+        const response = await signIn("credentials", {
+          username: data.username,
+          password: data.password,
+          redirect: false,
+        });
+        if (!response || response.error) {
+          const msg = "Invalid email/username or password.";
+          setErrorMsg(msg);
+          toast.error(msg);
           return;
         }
         toast.success("Welcome back");
         router.replace("/dashboard");
         router.refresh();
-      } catch (err: unknown) {
-        // NEXT_REDIRECT / digest throws look like errors but login succeeded
-        const digest =
-          err && typeof err === "object" && "digest" in err
-            ? String((err as { digest?: string }).digest || "")
-            : "";
-        if (digest.includes("NEXT_REDIRECT") || digest.startsWith("NEXT_")) {
-          router.replace("/dashboard");
-          return;
-        }
+      } catch (err) {
         console.error(err);
         setErrorMsg("An unexpected error occurred.");
         toast.error("An unexpected error occurred.");

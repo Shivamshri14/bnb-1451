@@ -50,24 +50,23 @@ Open http://localhost:3000
 
 ---
 
-## 2. Required environment variables
+## 2. Required environment variables (Vercel)
 
-Set these in Hostinger (never commit real values). Template: `.env.example`
+In **Vercel → Project → Settings → Environment Variables**, set for **Production** (and Preview if needed):
 
-| Variable | Required | Example / notes |
-|----------|----------|-----------------|
-| `AUTH_SECRET` | Yes | `openssl rand -base64 32` |
-| `NEXTAUTH_URL` | Yes | `https://1451.edugeniushub.com` |
-| `AUTH_TRUST_HOST` | Yes | `true` (needed behind Hostinger proxy) |
-| `MONGODB_URI` | Yes | Atlas `mongodb+srv://...` connection string |
-| `ADMIN_USERNAME` | Optional | Seed admin username if DB has no users |
-| `ADMIN_PASSWORD` | Optional | Seed admin password (change after first login) |
+| Variable | Required | Value |
+|----------|----------|--------|
+| `AUTH_SECRET` | **Yes** | `openssl rand -base64 32` — without this `/api/auth/*` returns 500 |
+| `AUTH_URL` | **Yes** | `https://1451.edugeniushub.com` |
+| `NEXTAUTH_URL` | **Yes** | `https://1451.edugeniushub.com` |
+| `AUTH_TRUST_HOST` | **Yes** | `true` |
+| `MONGODB_URI` | **Yes** | Atlas `mongodb+srv://...` |
+| `ADMIN_USERNAME` | Optional | Seed admin if DB empty |
+| `ADMIN_PASSWORD` | Optional | Seed password |
 
-Notes:
+**After changing env vars, Redeploy** (Deployments → … → Redeploy).
 
-- This app uses **Auth.js v5** (`AUTH_SECRET`). `JWT_SECRET` is **not** used.
-- `NEXTAUTH_SECRET` is optional if `AUTH_SECRET` is set.
-- Do not point production at `mongodb://127.0.0.1` — use **MongoDB Atlas**.
+Quick check: open https://1451.edugeniushub.com/api/auth/providers — it should return JSON with `credentials`, not a server configuration error.
 
 ---
 

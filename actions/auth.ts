@@ -143,5 +143,6 @@ export async function resetPasswordAction(
 }
 
 export async function logoutAction() {
-  await signOut({ redirectTo: "/login" });
+  // Prefer client signOut (next-auth/react). Kept for compatibility.
+  await signOut({ redirectTo: "/login", redirect: true });
 }

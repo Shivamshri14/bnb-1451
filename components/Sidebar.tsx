@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { logoutAction } from "@/actions/auth";
+import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   CalendarRange,
@@ -26,6 +26,7 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [loggingOut, setLoggingOut] = useState(false);
 
   useEffect(() => {
     setTheme(document.documentElement.classList.contains("dark") ? "dark" : "light");
@@ -36,6 +37,12 @@ export default function Sidebar() {
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
     document.documentElement.classList.toggle("dark", newTheme === "dark");
+  };
+
+  const handleLogout = async () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    await signOut({ callbackUrl: "/login" });
   };
 
   return (
@@ -88,11 +95,16 @@ export default function Sidebar() {
                 );
               })}
             </nav>
-            <form action={logoutAction} className="border-t border-border pt-4">
-              <button type="submit" className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-500/10 cursor-pointer">
+            <div className="border-t border-border pt-4">
+              <button
+                type="button"
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-500/10 cursor-pointer disabled:opacity-50"
+              >
                 <LogOut className="h-5 w-5" /> Logout
               </button>
-            </form>
+            </div>
           </div>
         </div>
       )}
@@ -136,15 +148,15 @@ export default function Sidebar() {
             {theme === "light" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
             <span>{theme === "light" ? "Dark mode" : "Light mode"}</span>
           </button>
-          <form action={logoutAction}>
-            <button
-              type="submit"
-              className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-500/10 cursor-pointer"
-            >
-              <LogOut className="h-5 w-5" />
-              <span>Logout</span>
-            </button>
-          </form>
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-500/10 cursor-pointer disabled:opacity-50"
+          >
+            <LogOut className="h-5 w-5" />
+            <span>Logout</span>
+          </button>
         </div>
       </aside>
 
