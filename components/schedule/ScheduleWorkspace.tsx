@@ -17,6 +17,7 @@ import {
 } from "date-fns";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import QuickRecordModal from "@/components/home/QuickRecordModal";
+import { formatSlotAmPm, formatTimeAmPm } from "@/lib/time";
 
 type CalEvent = {
   id: string;
@@ -50,7 +51,7 @@ function toEvents(bookings: any[], commissions: any[]): CalEvent[] {
       startTime: b.checkInTime,
       endTime: b.checkOutTime,
       endDate: b.checkOutDate,
-      title: b.customerName,
+      title: b.customerName || "—",
       amount: b.finalAmount,
       payment: b.paymentStatus,
       via: b.via || "",
@@ -65,7 +66,7 @@ function toEvents(bookings: any[], commissions: any[]): CalEvent[] {
     startTime: c.checkInTime,
     endTime: c.checkOutTime,
     endDate: c.checkOutDate,
-    title: c.customerName,
+    title: c.customerName || "—",
     amount: c.commissionAmount ?? c.bookingAmount,
     payment: c.paymentCollected === "Yes" ? "Received" : "Pending",
     via: c.via || "",
@@ -214,7 +215,7 @@ export default function ScheduleWorkspace({
                           : "bg-accent/15 text-accent"
                       }`}
                     >
-                      {e.startTime} {e.title}
+                      {formatTimeAmPm(e.startTime)} {e.title}
                     </div>
                   ))}
                   {dayEv.length > 2 && (
@@ -252,7 +253,7 @@ export default function ScheduleWorkspace({
                     <div className="font-black text-sm">₹{e.amount.toLocaleString("en-IN")}</div>
                   </div>
                   <div className="text-[11px] text-muted mt-1">
-                    {e.kind} · {e.startTime} → {e.endTime}
+                    {e.kind} · {formatSlotAmPm(e.startTime, e.endTime)}
                     {e.via ? ` · via ${e.via}` : ""}
                   </div>
                   <div className="text-[11px] text-muted mt-0.5">
@@ -289,7 +290,7 @@ export default function ScheduleWorkspace({
                       </td>
                       <td className="px-4 py-3 font-semibold">{e.title}</td>
                       <td className="px-4 py-3 text-xs">
-                        {e.startTime} → {e.endTime}
+                        {formatSlotAmPm(e.startTime, e.endTime)}
                         {e.endDate !== e.date ? ` (${e.endDate})` : ""}
                       </td>
                       <td className="px-4 py-3 font-bold">₹{e.amount.toLocaleString("en-IN")}</td>

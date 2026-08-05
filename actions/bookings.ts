@@ -84,11 +84,9 @@ export async function createQuickRecordAction(data: QuickRecordInput) {
 
   const sourceRaw = d.sourceOrPhone?.trim() || "";
   const asPhone = sourceRaw ? normalizeIndianPhone(sourceRaw) : null;
-  const customerName = d.customerName.trim();
-  if (!customerName) {
-    return { success: false, error: "Guest name is required." };
-  }
+  const customerName = (d.customerName || "").trim();
   const via = d.via || "";
+  const roomNumber = d.roomNumber?.trim() || "1451";
 
   // Server-side: check-out cannot be in the past
   const now = new Date();
@@ -98,7 +96,7 @@ export async function createQuickRecordAction(data: QuickRecordInput) {
 
   if (d.entryType === "commission") {
     return createCommissionAction({
-      propertyName: `Room ${d.roomNumber?.trim() || "1451"}`,
+      propertyName: `Room ${roomNumber}`,
       customerName,
       bookingDate: format(new Date(), "yyyy-MM-dd"),
       checkInDate: d.checkInDate,
@@ -113,7 +111,7 @@ export async function createQuickRecordAction(data: QuickRecordInput) {
       notes: sourceRaw && !asPhone ? `Taken from: ${sourceRaw}` : "",
       phoneNumber: asPhone || "",
       via,
-      roomNumber: d.roomNumber?.trim() || "1451",
+      roomNumber,
     });
   }
 
@@ -130,7 +128,7 @@ export async function createQuickRecordAction(data: QuickRecordInput) {
   if (overlap) {
     return {
       success: false,
-      error: `Slot taken by ${overlap.customerName} (${overlap.checkInTime}–${overlap.checkOutTime}).`,
+      error: `Slot taken by ${overlap.customerName || "another booking"} (${overlap.checkInTime}–${overlap.checkOutTime}).`,
     };
   }
 
@@ -139,7 +137,7 @@ export async function createQuickRecordAction(data: QuickRecordInput) {
     customerName,
     phoneNumber: asPhone || "+919999999999",
     guestsCount: 1,
-    roomNumber: "1451",
+    roomNumber,
     via,
     bookingSource: via || (!asPhone && sourceRaw ? sourceRaw : "Direct"),
     checkInDate: d.checkInDate,

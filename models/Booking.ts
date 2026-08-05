@@ -35,11 +35,11 @@ export interface IBooking extends Document {
 
 const BookingSchema: Schema<IBooking> = new Schema(
   {
-    customerName: { type: String, required: true, trim: true },
+    customerName: { type: String, required: false, trim: true, default: "" },
     phoneNumber: { type: String, required: true, trim: true },
     email: { type: String, trim: true, lowercase: true, default: "" },
     guestsCount: { type: Number, required: true, min: 1, default: 1 },
-    roomNumber: { type: String, required: true, default: "1451", trim: true },
+    roomNumber: { type: String, required: false, default: "1451", trim: true },
     via: {
       type: String,
       enum: ["Group", "Airbnb App", "Instagram", "Referer", ""],

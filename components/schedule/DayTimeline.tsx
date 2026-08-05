@@ -2,6 +2,7 @@
 
 import { format, parseISO, addDays, subDays } from "date-fns";
 import { ChevronLeft, ChevronRight, Plus, Clock, Banknote } from "lucide-react";
+import { formatSlotAmPm } from "@/lib/time";
 
 export type TimelineSegment =
   | {
@@ -135,7 +136,7 @@ export default function DayTimeline({
           return (
             <div
               key={`bar-${seg._id}`}
-              title={`${seg.checkInTime}–${seg.checkOutTime}`}
+              title={`${formatSlotAmPm(seg.checkInTime, seg.checkOutTime)}`}
               style={{ width: `${width}%` }}
               className={
                 seg.type === "booked"
@@ -166,7 +167,7 @@ export default function DayTimeline({
                   <div>
                     <div className="flex items-center gap-2 text-empty font-bold text-sm">
                       <Clock className="h-4 w-4" />
-                      {seg.checkInTime} → {seg.checkOutTime}
+                      {formatSlotAmPm(seg.checkInTime, seg.checkOutTime)}
                       <span className="text-xs font-semibold opacity-80">
                         ({seg.totalHours}h empty)
                       </span>
@@ -193,7 +194,7 @@ export default function DayTimeline({
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-bold text-foreground">{seg.customerName}</span>
+                    <span className="font-bold text-foreground">{seg.customerName || "—"}</span>
                     <span className="text-[10px] uppercase font-bold tracking-wide rounded-md px-1.5 py-0.5 bg-surface text-muted border border-border">
                       {seg.bookingStatus}
                     </span>
@@ -203,7 +204,7 @@ export default function DayTimeline({
                   </div>
                   <div className="mt-1 flex items-center gap-2 text-sm text-booked font-semibold">
                     <Clock className="h-3.5 w-3.5" />
-                    {seg.checkInTime} → {seg.checkOutTime}
+                    {formatSlotAmPm(seg.checkInTime, seg.checkOutTime)}
                     <span className="text-xs text-muted font-medium">· {seg.totalHours}h</span>
                   </div>
                 </div>

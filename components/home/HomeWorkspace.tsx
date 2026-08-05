@@ -5,6 +5,7 @@ import { format, parseISO } from "date-fns";
 import { Plus, IndianRupee, Clock, AlertCircle } from "lucide-react";
 import QuickRecordModal from "./QuickRecordModal";
 import { useRouter } from "next/navigation";
+import { formatSlotAmPm, formatTimeAmPm } from "@/lib/time";
 
 interface HomeWorkspaceProps {
   stats: any;
@@ -86,7 +87,7 @@ export default function HomeWorkspace({ stats, todayLabel }: HomeWorkspaceProps)
                 onClick={() => setOpen(true)}
                 className="rounded-xl bg-rose-600 text-white px-3 py-2 text-xs font-bold cursor-pointer hover:bg-rose-700"
               >
-                {slot.checkInTime} → {slot.checkOutTime}
+                {formatSlotAmPm(slot.checkInTime, slot.checkOutTime)}
                 <span className="opacity-80 font-semibold"> · {slot.totalHours}h</span>
               </button>
             ))}
@@ -110,9 +111,9 @@ export default function HomeWorkspace({ stats, todayLabel }: HomeWorkspaceProps)
                 className="flex justify-between gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm"
               >
                 <div>
-                  <div className="font-semibold">{b.customerName}</div>
+                  <div className="font-semibold">{b.customerName || "—"}</div>
                   <div className="text-[11px] text-muted">
-                    {b.checkInDate} {b.checkInTime} → {b.checkOutTime} · {b.paymentStatus}
+                    {b.checkInDate} {formatSlotAmPm(b.checkInTime, b.checkOutTime)} · {b.paymentStatus}
                   </div>
                 </div>
                 <div className="font-black text-amber-700 dark:text-amber-400">
@@ -137,13 +138,13 @@ export default function HomeWorkspace({ stats, todayLabel }: HomeWorkspaceProps)
               {(stats.todayHistory || []).map((b: any) => (
                 <div key={b._id} className="rounded-xl border border-border px-3 py-2.5">
                   <div className="flex justify-between gap-2">
-                    <div className="font-semibold text-sm">{b.customerName}</div>
+                    <div className="font-semibold text-sm">{b.customerName || "—"}</div>
                     <div className="font-black text-sm">
                       ₹{(b.finalAmount || 0).toLocaleString("en-IN")}
                     </div>
                   </div>
                   <div className="text-[11px] text-muted mt-1">
-                    {b.checkInTime} → {b.checkOutTime} · {b.paymentStatus}
+                    {formatSlotAmPm(b.checkInTime, b.checkOutTime)} · {b.paymentStatus}
                   </div>
                   <div className="text-[11px] text-muted mt-0.5">
                     By {b.createdBy || "—"}
@@ -167,9 +168,9 @@ export default function HomeWorkspace({ stats, todayLabel }: HomeWorkspaceProps)
                 <tbody className="divide-y divide-border">
                   {(stats.todayHistory || []).map((b: any) => (
                     <tr key={b._id} className="hover:bg-surface-muted/40">
-                      <td className="px-4 py-3 font-semibold">{b.customerName}</td>
+                      <td className="px-4 py-3 font-semibold">{b.customerName || "—"}</td>
                       <td className="px-4 py-3 text-xs">
-                        {b.checkInTime} → {b.checkOutTime}
+                        {formatSlotAmPm(b.checkInTime, b.checkOutTime)}
                       </td>
                       <td className="px-4 py-3 font-bold">
                         ₹{(b.finalAmount || 0).toLocaleString("en-IN")}
@@ -201,13 +202,14 @@ export default function HomeWorkspace({ stats, todayLabel }: HomeWorkspaceProps)
               {(stats.upcoming || []).map((b: any) => (
                 <div key={b._id} className="rounded-xl border border-border px-3 py-2.5">
                   <div className="flex justify-between gap-2">
-                    <div className="font-semibold text-sm">{b.customerName}</div>
+                    <div className="font-semibold text-sm">{b.customerName || "—"}</div>
                     <div className="font-black text-sm">
                       ₹{(b.finalAmount || 0).toLocaleString("en-IN")}
                     </div>
                   </div>
                   <div className="text-[11px] text-muted mt-1">
-                    {b.checkInDate} {b.checkInTime} → {b.checkOutDate} {b.checkOutTime}
+                    {b.checkInDate} {formatTimeAmPm(b.checkInTime)} → {b.checkOutDate}{" "}
+                    {formatTimeAmPm(b.checkOutTime)}
                   </div>
                   <div className="text-[11px] text-muted mt-0.5">
                     By {b.createdBy || "—"}
@@ -232,10 +234,10 @@ export default function HomeWorkspace({ stats, todayLabel }: HomeWorkspaceProps)
                 <tbody className="divide-y divide-border">
                   {(stats.upcoming || []).map((b: any) => (
                     <tr key={b._id} className="hover:bg-surface-muted/40">
-                      <td className="px-4 py-3 font-semibold">{b.customerName}</td>
+                      <td className="px-4 py-3 font-semibold">{b.customerName || "—"}</td>
                       <td className="px-4 py-3 text-xs">
-                        {format(parseISO(b.checkInDate), "dd MMM")} {b.checkInTime} →{" "}
-                        {format(parseISO(b.checkOutDate), "dd MMM")} {b.checkOutTime}
+                        {format(parseISO(b.checkInDate), "dd MMM")} {formatTimeAmPm(b.checkInTime)} →{" "}
+                        {format(parseISO(b.checkOutDate), "dd MMM")} {formatTimeAmPm(b.checkOutTime)}
                       </td>
                       <td className="px-4 py-3 font-bold">
                         ₹{(b.finalAmount || 0).toLocaleString("en-IN")}

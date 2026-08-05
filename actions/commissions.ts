@@ -190,7 +190,7 @@ export async function createCommissionAction(
 
   const doc = await CommissionBooking.create({
     propertyName: parsed.data.propertyName,
-    customerName: parsed.data.customerName,
+    customerName: parsed.data.customerName || "",
     bookingDate: parsed.data.bookingDate,
     checkInDate: parsed.data.checkInDate,
     checkInTime: parsed.data.checkInTime || "10:00",

@@ -23,6 +23,7 @@ import {
   Clock,
 } from "lucide-react";
 import DayTimeline, { TimelineSegment } from "@/components/schedule/DayTimeline";
+import { formatSlotAmPm, formatTimeAmPm } from "@/lib/time";
 
 interface CommissionWorkspaceProps {
   initialCommissions: any[];
@@ -80,7 +81,7 @@ export default function CommissionWorkspace({
   const filteredCommissions = useMemo(() => {
     return commissions.filter((item) => {
       const matchesSearch =
-        item.customerName.toLowerCase().includes(search.toLowerCase()) ||
+        (item.customerName || "").toLowerCase().includes(search.toLowerCase()) ||
         item.propertyName.toLowerCase().includes(search.toLowerCase());
       const matchesPayment =
         paymentFilter === "ALL" || item.paymentCollected === paymentFilter;
@@ -269,7 +270,7 @@ export default function CommissionWorkspace({
           <div key={item._id} className="rounded-2xl border border-border bg-surface p-4 space-y-2">
             <div className="flex justify-between">
               <div>
-                <div className="font-bold">{item.customerName}</div>
+                <div className="font-bold">{item.customerName || "—"}</div>
                 <div className="text-xs text-muted">{item.propertyName}</div>
               </div>
               <span
@@ -284,7 +285,7 @@ export default function CommissionWorkspace({
             </div>
             <div className="text-sm font-semibold text-accent flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5" />
-              {item.checkInTime || "—"} → {item.checkOutTime || "—"}
+              {formatSlotAmPm(item.checkInTime, item.checkOutTime)}
             </div>
             <div className="flex justify-between items-center pt-2 border-t border-border">
               <span className="font-black">₹{item.commissionAmount.toLocaleString("en-IN")}</span>
@@ -325,11 +326,11 @@ export default function CommissionWorkspace({
             {filteredCommissions.map((item) => (
               <tr key={item._id} className="hover:bg-surface-muted/40">
                 <td className="px-4 py-3">
-                  <div className="font-semibold">{item.customerName}</div>
+                  <div className="font-semibold">{item.customerName || "—"}</div>
                   <div className="text-xs text-muted">{item.propertyName}</div>
                 </td>
                 <td className="px-4 py-3 text-xs">
-                  {item.checkInDate} {item.checkInTime} → {item.checkOutTime}
+                  {item.checkInDate} {formatSlotAmPm(item.checkInTime, item.checkOutTime)}
                 </td>
                 <td className="px-4 py-3">₹{item.bookingAmount.toLocaleString("en-IN")}</td>
                 <td className="px-4 py-3 font-bold">
@@ -384,14 +385,12 @@ export default function CommissionWorkspace({
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div className="col-span-2 sm:col-span-1">
-                  <label className="text-xs font-semibold text-muted uppercase">Guest *</label>
+                  <label className="text-xs font-semibold text-muted uppercase">Guest</label>
                   <input
                     {...register("customerName")}
                     className="mt-1 w-full px-3 py-2 text-sm rounded-xl border border-border bg-surface-muted/40 focus:outline-none focus:ring-2 focus:ring-accent"
+                    placeholder="Optional"
                   />
-                  {errors.customerName && (
-                    <p className="text-xs text-rose-500 mt-1">{errors.customerName.message}</p>
-                  )}
                 </div>
                 <div className="col-span-2 sm:col-span-1">
                   <label className="text-xs font-semibold text-muted uppercase">Platform</label>

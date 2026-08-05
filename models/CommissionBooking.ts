@@ -27,8 +27,8 @@ export interface ICommissionBooking extends Document {
 const CommissionBookingSchema: Schema<ICommissionBooking> = new Schema(
   {
     propertyName: { type: String, required: true, trim: true },
-    customerName: { type: String, required: true, trim: true },
-    roomNumber: { type: String, required: true, trim: true, default: "1451" },
+    customerName: { type: String, required: false, trim: true, default: "" },
+    roomNumber: { type: String, required: false, trim: true, default: "1451" },
     via: {
       type: String,
       enum: ["Group", "Airbnb App", "Instagram", "Referer", ""],

@@ -28,12 +28,12 @@ export type RoomInput = z.infer<typeof roomSchema>;
 
 export const bookingSchema = z
   .object({
-  customerName: z.string().min(1, "Customer name is required").trim(),
+  customerName: z.string().trim().optional().default(""),
   phoneNumber: indianPhoneRequired,
   email: z.string().email("Invalid email address").optional().or(z.literal("")),
   guestsCount: z.coerce.number().min(1, "Guests count must be at least 1").default(1),
   idProof: z.string().optional().default(""),
-  room: z.string().min(1, "Room is required").default("1451"),
+  room: z.string().optional().default("1451"),
   bookingSource: z.enum(["Direct", "Airbnb", "Booking.com", "Agoda", "Other"]).default("Direct"),
   checkInDate: z.string().min(1, "Check-in date is required"),
   checkInTime: z.string().min(1, "Check-in time is required"),
@@ -76,7 +76,7 @@ export type BookingInput = z.infer<typeof bookingSchema>;
 
 export const commissionSchema = z.object({
   propertyName: z.string().min(1).trim().default("Og Stays (Room 1451)"),
-  customerName: z.string().min(1, "Customer / source is required").trim(),
+  customerName: z.string().trim().optional().default(""),
   bookingDate: z.string().min(1),
   checkInDate: z.string().min(1),
   checkInTime: z.string().min(1).default("10:00"),
@@ -105,18 +105,10 @@ export const quickRecordSchema = z
     paymentStatus: z.enum(["Received", "Pending"]),
     sourceOrPhone: z.string().optional().default(""),
     roomNumber: z.string().optional().default(""),
-    customerName: z.string().min(1, "Guest name is required").trim(),
+    customerName: z.string().trim().optional().default(""),
     via: z.enum(["", "Group", "Airbnb App", "Instagram", "Referer"]).optional().default(""),
   })
   .superRefine((data, ctx) => {
-    if (data.entryType === "commission" && !data.roomNumber?.trim()) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Room number is required for commission",
-        path: ["roomNumber"],
-      });
-    }
-
     const checkIn = new Date(`${data.checkInDate}T${data.checkInTime}:00`);
     const checkOut = new Date(`${data.checkOutDate}T${data.checkOutTime}:00`);
     const now = new Date();

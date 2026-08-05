@@ -228,7 +228,7 @@ export default function CalendarWorkspace({ bookings: initialBookings }: Calenda
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
-                <input {...register("customerName")} required placeholder="Guest name" className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-border bg-surface-muted/40 focus:outline-none focus:ring-2 focus:ring-brand" />
+                <input {...register("customerName")} placeholder="Guest name (optional)" className="w-full pl-10 pr-3 py-2 text-sm rounded-xl border border-border bg-surface-muted/40 focus:outline-none focus:ring-2 focus:ring-brand" />
               </div>
               <input {...register("phoneNumber")} required placeholder="Phone" className="w-full px-3 py-2 text-sm rounded-xl border border-border bg-surface-muted/40 focus:outline-none focus:ring-2 focus:ring-brand" />
               <div className="grid grid-cols-2 gap-2 rounded-xl border border-brand/20 bg-brand-soft/40 p-3">

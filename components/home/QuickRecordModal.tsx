@@ -161,29 +161,23 @@ export default function QuickRecordModal({ open, onClose, onSaved }: QuickRecord
 
           {entryType === "commission" && (
             <div>
-              <label className="text-[9px] font-bold text-muted uppercase">Room number *</label>
+              <label className="text-[9px] font-bold text-muted uppercase">Room number</label>
               <input
                 {...register("roomNumber")}
                 className="w-full mt-0.5 px-2 py-1.5 text-sm rounded-lg border border-border bg-surface-muted/30"
-                placeholder="e.g. 1451"
+                placeholder="Optional · e.g. 1451"
               />
-              {errors.roomNumber && (
-                <p className="text-[10px] text-rose-500">{errors.roomNumber.message as string}</p>
-              )}
             </div>
           )}
 
           <div className="grid grid-cols-2 gap-1.5">
             <div>
-              <label className="text-[9px] font-bold text-muted uppercase">Guest name *</label>
+              <label className="text-[9px] font-bold text-muted uppercase">Guest name</label>
               <input
                 {...register("customerName")}
                 className="w-full mt-0.5 px-2 py-1.5 text-xs rounded-lg border border-border bg-surface-muted/30"
-                placeholder="Required"
+                placeholder="Optional"
               />
-              {errors.customerName && (
-                <p className="text-[10px] text-rose-500">{errors.customerName.message as string}</p>
-              )}
             </div>
             <div>
               <label className="text-[9px] font-bold text-muted uppercase">Source / phone</label>
