@@ -22,6 +22,8 @@ import {
   ArrowLeft,
   Moon,
   Sun,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -42,6 +44,8 @@ export default function LoginPage() {
   const [newPassword, setNewPassword] = useState("");
   const [demoOtp, setDemoOtp] = useState<string | null>(null);
   const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showResetPassword, setShowResetPassword] = useState(false);
 
   const {
     register,
@@ -208,13 +212,22 @@ export default function LoginPage() {
                   <div className="relative">
                     <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       {...register("password")}
-                      className="w-full rounded-xl border border-border bg-surface-muted/50 py-2.5 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+                      className="w-full rounded-xl border border-border bg-surface-muted/50 py-2.5 pl-10 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                       placeholder="••••••••"
                       disabled={isPending}
                       autoComplete="current-password"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground cursor-pointer"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
                   </div>
                   {errors.password && (
                     <p className="mt-1 text-xs text-rose-500">{errors.password.message}</p>
@@ -335,13 +348,22 @@ export default function LoginPage() {
                 <div className="relative">
                   <Key className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted" />
                   <input
-                    type="password"
+                    type={showResetPassword ? "text" : "password"}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full rounded-xl border border-border bg-surface-muted/50 py-2.5 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
+                    className="w-full rounded-xl border border-border bg-surface-muted/50 py-2.5 pl-10 pr-11 text-sm focus:outline-none focus:ring-2 focus:ring-brand"
                     placeholder="Minimum 6 characters"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowResetPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-foreground cursor-pointer"
+                    aria-label={showResetPassword ? "Hide password" : "Show password"}
+                    tabIndex={-1}
+                  >
+                    {showResetPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
                 <button
                   type="submit"
