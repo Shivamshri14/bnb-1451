@@ -15,7 +15,7 @@ This app is already complete. This guide only covers going live.
 1. Log in to **hPanel** → **Websites** → select `edugeniushub.com` (or create/use Node.js hosting).
 2. Open **Node.js** / **Web Apps** (wording varies by plan) → **Create application**.
 3. Settings:
-   - **Node.js version:** `20.x` (or `22.x` if offered; minimum Node 20)
+   - **Node.js version:** `24.x`
    - **Application root:** folder where you upload this project (contains `package.json`)
    - **Application URL / domain:** `1451.edugeniushub.com`
    - **Build command:** `npm run build`
@@ -130,7 +130,7 @@ No OAuth / Google login in this project — only credentials. No extra OAuth cal
 | Login loops / CSRF / host errors | Wrong URL or untrusted host | `NEXTAUTH_URL=https://1451.edugeniushub.com` and `AUTH_TRUST_HOST=true` |
 | DB / Mongo errors | Atlas network or bad URI | Whitelist Hostinger IP (or `0.0.0.0/0` for test); check user/password encoding |
 | `ECONNREFUSED 127.0.0.1:27017` | Still using local Mongo fallback | Set real Atlas `MONGODB_URI` in Hostinger |
-| Wrong Node version | Node &lt; 18/20 | Select **Node 20** in Hostinger |
+| Wrong Node version | Unsupported Node | Select **Node 24** in Hostinger / Vercel |
 | Port / app not reachable | Wrong start or SSL not bound | Use `npm start`; ensure subdomain points to the Node app + SSL on |
 | Upload size huge | Uploaded `node_modules` / `.next` | Upload source only; run `npm install` + `npm run build` on server |
 | Seed admin not created | Users already exist | Create account via `/signup` or set admin in Atlas |
@@ -141,7 +141,7 @@ No OAuth / Google login in this project — only credentials. No extra OAuth cal
 
 | Item | Value |
 |------|--------|
-| **Node version** | `20.x` (engines: `>=20`) |
+| **Node version** | `24.x` (engines: `24.x`) |
 | **Build command** | `npm run build` |
 | **Start command** | `npm start` |
 | **Package manager** | npm (`package-lock.json`) |
