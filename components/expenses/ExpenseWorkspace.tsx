@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { expenseSchema, ExpenseInput } from "@/lib/validations";
+import { expenseSchema } from "@/lib/validations";
 import { createExpenseAction, deleteExpenseAction } from "@/actions/expenses";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";

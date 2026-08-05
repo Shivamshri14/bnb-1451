@@ -67,7 +67,7 @@ export default function CalendarWorkspace({ bookings: initialBookings }: Calenda
     control: control as any,
     name: ["checkInDate", "checkInTime", "checkOutDate", "checkOutTime", "roomPrice", "discount", "tax", "advancePaid"],
   });
-  const [cid, cit, cod, cot, rate, disc, tax, adv] = watched;
+  const [cid, cit, cod, cot, rate, disc, tax] = watched;
   let totalHours = 0;
   let finalAmount = 0;
   if (cid && cit && cod && cot) {
