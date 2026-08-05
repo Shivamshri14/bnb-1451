@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+/* Class-based dark mode (toggle), not only system preference */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f4f7f5;
+  --foreground: #14231c;
+  --surface: #ffffff;
+  --surface-muted: #e8efe9;
+  --border: #d5e0d8;
+  --muted: #5b6f63;
+  --brand: #0d7a5f;
+  --brand-soft: #d8f3ea;
+  --accent: #c45c26;
+  --accent-soft: #fce8de;
+  --success: #059669;
+  --warning: #d97706;
+  --danger: #dc2626;
+  --empty: #1a7a8c;
+  --booked: #0d7a5f;
+  --radius: 1rem;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "DM Sans", system-ui, sans-serif;
+}
+
+.dark {
+  --background: #0c1410;
+  --foreground: #e8f0ea;
+  --surface: #142019;
+  --surface-muted: #1a2a21;
+  --border: #2a3d32;
+  --muted: #9bb0a3;
+  --brand: #3ecf9a;
+  --brand-soft: #123528;
+  --accent: #f0a06a;
+  --accent-soft: #3a2418;
+  --empty: #4ec4d9;
+  --booked: #3ecf9a;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-empty: var(--empty);
+  --color-booked: var(--booked);
+  --font-sans: var(--font-sans);
+  --font-display: var(--font-display);
+}
+
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, color-mix(in oklab, var(--brand) 16%, transparent), transparent 55%),
+    radial-gradient(900px 500px at 100% 0%, color-mix(in oklab, var(--accent) 12%, transparent), transparent 50%),
+    var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  min-height: 100%;
+}
+
+/* FullCalendar theme hooks */
+.fc {
+  --fc-border-color: var(--border);
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: var(--surface-muted);
+  --fc-list-event-hover-bg-color: var(--surface-muted);
+  --fc-today-bg-color: color-mix(in oklab, var(--brand) 10%, transparent);
+  --fc-button-bg-color: var(--brand);
+  --fc-button-border-color: var(--brand);
+  --fc-button-hover-bg-color: color-mix(in oklab, var(--brand) 85%, black);
+  --fc-button-hover-border-color: color-mix(in oklab, var(--brand) 85%, black);
+  --fc-button-active-bg-color: color-mix(in oklab, var(--brand) 75%, black);
+  --fc-button-active-border-color: color-mix(in oklab, var(--brand) 75%, black);
+  font-family: var(--font-sans);
+}
+
+.fc .fc-toolbar-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem !important;
+}
+
+.fc .fc-scrollgrid,
+.fc .fc-timegrid-slot {
+  border-color: var(--border) !important;
+}
+
+.fc-theme-standard td,
+.fc-theme-standard th {
+  border-color: var(--border) !important;
+}
+
+@media (max-width: 640px) {
+  .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .fc .fc-toolbar-title {
+    font-size: 1rem !important;
+  }
+}
