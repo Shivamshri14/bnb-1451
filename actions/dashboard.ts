@@ -6,7 +6,7 @@ import Booking from "@/models/Booking";
 import CommissionBooking from "@/models/CommissionBooking";
 import Expense from "@/models/Expense";
 import { OG_ROOM } from "@/lib/constants";
-import { mapBookingDoc, buildDayTimeline } from "@/lib/booking-store";
+import { mapBookingDoc, buildDayTimeline, filterEmptySlotsFromNow } from "@/lib/booking-store";
 
 export async function getDashboardStats() {
   await connectToDatabase();
@@ -62,7 +62,10 @@ export async function getDashboardStats() {
     )
     .sort((a, b) => b.remainingAmount - a.remainingAmount);
 
-  const emptySlots = buildDayTimeline(bookings, todayStr).filter((s) => s.type === "empty");
+  const emptySlots = filterEmptySlotsFromNow(
+    buildDayTimeline(bookings, todayStr).filter((s) => s.type === "empty") as any[],
+    now
+  );
 
   const commissionDocs = await CommissionBooking.find().lean();
   const commissionPaid = commissionDocs

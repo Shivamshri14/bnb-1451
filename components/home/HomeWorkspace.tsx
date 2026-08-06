@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { format, parseISO } from "date-fns";
-import { Plus, IndianRupee, Clock, AlertCircle } from "lucide-react";
+import { format } from "date-fns";
+import { Plus, IndianRupee } from "lucide-react";
 import QuickRecordModal from "./QuickRecordModal";
+import EmptySlotsPanel from "./EmptySlotsPanel";
+import BookingRecordsTable from "./BookingRecordsTable";
 import { useRouter } from "next/navigation";
-import { formatSlotAmPm, formatTimeAmPm } from "@/lib/time";
 
 interface HomeWorkspaceProps {
   stats: any;
@@ -29,6 +30,7 @@ export default function HomeWorkspace({ stats, todayLabel }: HomeWorkspaceProps)
     }).format(v || 0);
 
   const onSaved = () => router.refresh();
+  const onUpdated = () => router.refresh();
 
   return (
     <div className="space-y-4 sm:space-y-5">
@@ -54,7 +56,6 @@ export default function HomeWorkspace({ stats, todayLabel }: HomeWorkspaceProps)
         </div>
       </div>
 
-      {/* Earnings + today collection */}
       <div className="grid grid-cols-2 gap-3">
         <div className="rounded-2xl border border-border bg-surface p-3.5">
           <div className="text-[10px] uppercase font-semibold text-muted flex items-center gap-1">
@@ -70,192 +71,30 @@ export default function HomeWorkspace({ stats, todayLabel }: HomeWorkspaceProps)
         </div>
       </div>
 
-      {/* Empty slots — red */}
-      <div className="rounded-2xl border border-rose-500/40 bg-rose-500/15 p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <Clock className="h-4 w-4 text-rose-600" />
-          <h2 className="font-bold text-sm text-rose-700 dark:text-rose-300">Empty slots today</h2>
-        </div>
-        {(stats.emptySlots || []).length === 0 ? (
-          <p className="text-xs text-rose-700/80 dark:text-rose-300/80">No empty gaps marked for today (or fully booked).</p>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {(stats.emptySlots || []).map((slot: any) => (
-              <button
-                key={slot._id}
-                type="button"
-                onClick={() => setOpen(true)}
-                className="rounded-xl bg-rose-600 text-white px-3 py-2 text-xs font-bold cursor-pointer hover:bg-rose-700"
-              >
-                {formatSlotAmPm(slot.checkInTime, slot.checkOutTime)}
-                <span className="opacity-80 font-semibold"> · {slot.totalHours}h</span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
+      <EmptySlotsPanel slots={stats.emptySlots || []} onBook={() => setOpen(true)} />
 
-      {/* Pending payments */}
-      <div className="rounded-2xl border border-border bg-surface p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <AlertCircle className="h-4 w-4 text-amber-500" />
-          <h2 className="font-bold text-sm">Pending payments</h2>
-        </div>
-        {(stats.pendingPayments || []).length === 0 ? (
-          <p className="text-xs text-muted text-center py-4">No pending dues 🎉</p>
-        ) : (
-          <div className="space-y-2 max-h-48 overflow-y-auto">
-            {(stats.pendingPayments || []).map((b: any) => (
-              <div
-                key={b._id}
-                className="flex justify-between gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm"
-              >
-                <div>
-                  <div className="font-semibold">{b.customerName || "—"}</div>
-                  <div className="text-[11px] text-muted">
-                    {b.checkInDate} {formatSlotAmPm(b.checkInTime, b.checkOutTime)} · {b.paymentStatus}
-                  </div>
-                </div>
-                <div className="font-black text-amber-700 dark:text-amber-400">
-                  ₹{(b.remainingAmount || b.finalAmount || 0).toLocaleString("en-IN")}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <BookingRecordsTable
+        title="Pending payments"
+        bookings={stats.pendingPayments || []}
+        emptyMessage="No pending dues"
+        showPaymentDropdown
+        highlightPending
+        onUpdated={onUpdated}
+      />
 
-      {/* Today's history — table like expenses */}
-      <div className="rounded-2xl border border-border bg-surface overflow-hidden">
-        <div className="px-4 py-3 border-b border-border">
-          <h2 className="font-bold text-sm">Today&apos;s booking history</h2>
-        </div>
-        {(stats.todayHistory || []).length === 0 ? (
-          <p className="text-xs text-muted text-center py-8">No bookings recorded for today.</p>
-        ) : (
-          <>
-            <div className="space-y-2 p-3 md:hidden">
-              {(stats.todayHistory || []).map((b: any) => (
-                <div key={b._id} className="rounded-xl border border-border px-3 py-2.5">
-                  <div className="flex justify-between gap-2">
-                    <div className="font-semibold text-sm">{b.customerName || "—"}</div>
-                    <div className="font-black text-sm">
-                      ₹{(b.finalAmount || 0).toLocaleString("en-IN")}
-                    </div>
-                  </div>
-                  <div className="text-[11px] text-muted mt-1">
-                    {formatSlotAmPm(b.checkInTime, b.checkOutTime)} · {b.paymentStatus}
-                  </div>
-                  <div className="text-[11px] text-muted mt-0.5">
-                    By {b.createdBy || "—"}
-                    {b.createdAt ? ` · ${format(parseISO(b.createdAt), "hh:mm a")}` : ""}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-surface-muted/60 text-xs uppercase tracking-wider text-muted">
-                  <tr>
-                    <th className="px-4 py-3">Guest</th>
-                    <th className="px-4 py-3">Slot</th>
-                    <th className="px-4 py-3">Amount</th>
-                    <th className="px-4 py-3">Payment</th>
-                    <th className="px-4 py-3">Created by</th>
-                    <th className="px-4 py-3">Time</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {(stats.todayHistory || []).map((b: any) => (
-                    <tr key={b._id} className="hover:bg-surface-muted/40">
-                      <td className="px-4 py-3 font-semibold">{b.customerName || "—"}</td>
-                      <td className="px-4 py-3 text-xs">
-                        {formatSlotAmPm(b.checkInTime, b.checkOutTime)}
-                      </td>
-                      <td className="px-4 py-3 font-bold">
-                        ₹{(b.finalAmount || 0).toLocaleString("en-IN")}
-                      </td>
-                      <td className="px-4 py-3 text-xs">{b.paymentStatus}</td>
-                      <td className="px-4 py-3 text-xs">{b.createdBy || "—"}</td>
-                      <td className="px-4 py-3 text-xs text-muted">
-                        {b.createdAt ? format(parseISO(b.createdAt), "hh:mm a") : "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
-      </div>
+      <BookingRecordsTable
+        title="Today's bookings"
+        bookings={stats.todayHistory || []}
+        emptyMessage="No bookings recorded for today."
+        showPaymentDropdown
+        onUpdated={onUpdated}
+      />
 
-      {/* Upcoming — table like expenses */}
-      <div className="rounded-2xl border border-border bg-surface overflow-hidden">
-        <div className="px-4 py-3 border-b border-border">
-          <h2 className="font-bold text-sm">Upcoming</h2>
-        </div>
-        {(stats.upcoming || []).length === 0 ? (
-          <p className="text-xs text-muted text-center py-8">No upcoming bookings.</p>
-        ) : (
-          <>
-            <div className="space-y-2 p-3 md:hidden">
-              {(stats.upcoming || []).map((b: any) => (
-                <div key={b._id} className="rounded-xl border border-border px-3 py-2.5">
-                  <div className="flex justify-between gap-2">
-                    <div className="font-semibold text-sm">{b.customerName || "—"}</div>
-                    <div className="font-black text-sm">
-                      ₹{(b.finalAmount || 0).toLocaleString("en-IN")}
-                    </div>
-                  </div>
-                  <div className="text-[11px] text-muted mt-1">
-                    {b.checkInDate} {formatTimeAmPm(b.checkInTime)} → {b.checkOutDate}{" "}
-                    {formatTimeAmPm(b.checkOutTime)}
-                  </div>
-                  <div className="text-[11px] text-muted mt-0.5">
-                    By {b.createdBy || "—"}
-                    {b.createdAt
-                      ? ` · ${format(parseISO(b.createdAt), "dd MMM, hh:mm a")}`
-                      : ""}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="hidden md:block overflow-x-auto">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-surface-muted/60 text-xs uppercase tracking-wider text-muted">
-                  <tr>
-                    <th className="px-4 py-3">Guest</th>
-                    <th className="px-4 py-3">Slot</th>
-                    <th className="px-4 py-3">Amount</th>
-                    <th className="px-4 py-3">Created by</th>
-                    <th className="px-4 py-3">Time</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {(stats.upcoming || []).map((b: any) => (
-                    <tr key={b._id} className="hover:bg-surface-muted/40">
-                      <td className="px-4 py-3 font-semibold">{b.customerName || "—"}</td>
-                      <td className="px-4 py-3 text-xs">
-                        {format(parseISO(b.checkInDate), "dd MMM")} {formatTimeAmPm(b.checkInTime)} →{" "}
-                        {format(parseISO(b.checkOutDate), "dd MMM")} {formatTimeAmPm(b.checkOutTime)}
-                      </td>
-                      <td className="px-4 py-3 font-bold">
-                        ₹{(b.finalAmount || 0).toLocaleString("en-IN")}
-                      </td>
-                      <td className="px-4 py-3 text-xs">{b.createdBy || "—"}</td>
-                      <td className="px-4 py-3 text-xs text-muted">
-                        {b.createdAt
-                          ? format(parseISO(b.createdAt), "dd MMM yyyy, hh:mm a")
-                          : "—"}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
-        )}
-      </div>
+      <BookingRecordsTable
+        title="Upcoming bookings"
+        bookings={stats.upcoming || []}
+        emptyMessage="No upcoming bookings."
+      />
 
       <QuickRecordModal open={open} onClose={() => setOpen(false)} onSaved={onSaved} />
     </div>

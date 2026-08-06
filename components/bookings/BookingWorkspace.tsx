@@ -9,6 +9,7 @@ import {
   updateBookingAction,
   cancelBookingAction,
   getBookingsAction,
+  updateBookingPaymentAction,
 } from "@/actions/bookings";
 import { toast } from "sonner";
 import { format, parseISO, differenceInHours } from "date-fns";
@@ -24,7 +25,7 @@ import {
   Clock,
 } from "lucide-react";
 import DayTimeline, { TimelineSegment } from "@/components/schedule/DayTimeline";
-import { formatSlotAmPm, formatTimeAmPm } from "@/lib/time";
+import { formatSlotAmPm, formatTimeAmPm, formatDateDDMMYYYY } from "@/lib/time";
 import { buildDayTimeline } from "@/lib/booking-store";
 import { OG_ROOM } from "@/lib/constants";
 
@@ -41,6 +42,28 @@ export default function BookingWorkspace({ initialBookings }: BookingWorkspacePr
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingBooking, setEditingBooking] = useState<any | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  const handlePaymentChange = (id: string, value: string) => {
+    const status = value === "Received" ? "Paid" : value === "Partial" ? "Partial" : "Pending";
+    setUpdatingId(id);
+    startTransition(async () => {
+      const res = await updateBookingPaymentAction(id, status);
+      setUpdatingId(null);
+      if (res.success) {
+        toast.success("Payment updated");
+        refreshData();
+      } else {
+        toast.error(("error" in res && res.error) || "Update failed");
+      }
+    });
+  };
+
+  const paymentSelectValue = (status?: string) => {
+    if (status === "Paid") return "Received";
+    if (status === "Partial") return "Partial";
+    return "Pending";
+  };
 
   const {
     register,
@@ -277,12 +300,24 @@ export default function BookingWorkspace({ initialBookings }: BookingWorkspacePr
           >
             <div className="flex justify-between gap-2">
               <div>
-                <div className="font-bold">{booking.customerName || "—"}</div>
+                <div className="font-bold">{booking.customerName || ""}</div>
                 <div className="text-xs text-muted">{booking.phoneNumber}</div>
               </div>
               <div className="text-right text-xs font-semibold text-muted">
                 {booking.bookingStatus}
               </div>
+            </div>
+            <div className="flex justify-between items-center text-xs text-muted mb-2">
+               <select
+                value={paymentSelectValue(booking.paymentStatus)}
+                disabled={isPending && updatingId === booking._id}
+                onChange={(e) => handlePaymentChange(booking._id, e.target.value)}
+                className="rounded-lg border border-border bg-surface px-2 py-1 font-semibold"
+              >
+                <option value="Pending">Pending</option>
+                <option value="Received">Received</option>
+                <option value="Partial">Partial</option>
+              </select>
             </div>
             <div className="text-sm text-booked font-semibold flex items-center gap-1.5">
               <Clock className="h-3.5 w-3.5" />
@@ -322,6 +357,7 @@ export default function BookingWorkspace({ initialBookings }: BookingWorkspacePr
               <th className="px-4 py-3">Hours</th>
               <th className="px-4 py-3">Amount</th>
               <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Payment</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
@@ -329,20 +365,32 @@ export default function BookingWorkspace({ initialBookings }: BookingWorkspacePr
             {filtered.map((booking) => (
               <tr key={booking._id} className="hover:bg-surface-muted/40">
                 <td className="px-4 py-3">
-                  <div className="font-semibold">{booking.customerName || "—"}</div>
+                  <div className="font-semibold">{booking.customerName || ""}</div>
                   <div className="text-xs text-muted flex items-center gap-1">
                     <Phone className="h-3 w-3" /> {booking.phoneNumber}
                   </div>
                 </td>
                 <td className="px-4 py-3">
-                  {format(parseISO(booking.checkInDate), "MMM d")} {formatTimeAmPm(booking.checkInTime)} →{" "}
-                  {format(parseISO(booking.checkOutDate), "MMM d")} {formatTimeAmPm(booking.checkOutTime)}
+                  {formatDateDDMMYYYY(booking.checkInDate)} {formatTimeAmPm(booking.checkInTime)} →{" "}
+                  {formatDateDDMMYYYY(booking.checkOutDate)} {formatTimeAmPm(booking.checkOutTime)}
                 </td>
                 <td className="px-4 py-3 font-semibold">{booking.totalHours}h</td>
                 <td className="px-4 py-3 font-bold">
                   ₹{booking.finalAmount.toLocaleString("en-IN")}
                 </td>
                 <td className="px-4 py-3 text-xs font-semibold">{booking.bookingStatus}</td>
+                <td className="px-4 py-3">
+                   <select
+                    value={paymentSelectValue(booking.paymentStatus)}
+                    disabled={isPending && updatingId === booking._id}
+                    onChange={(e) => handlePaymentChange(booking._id, e.target.value)}
+                    className="rounded-lg border border-border bg-surface px-2 py-1.5 text-xs font-semibold cursor-pointer"
+                  >
+                    <option value="Pending">Pending</option>
+                    <option value="Received">Received</option>
+                    <option value="Partial">Partial</option>
+                  </select>
+                </td>
                 <td className="px-4 py-3 text-right whitespace-nowrap">
                   <button
                     type="button"

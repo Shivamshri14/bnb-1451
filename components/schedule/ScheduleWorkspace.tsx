@@ -17,7 +17,7 @@ import {
 } from "date-fns";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import QuickRecordModal from "@/components/home/QuickRecordModal";
-import { formatSlotAmPm, formatTimeAmPm } from "@/lib/time";
+import { formatSlotAmPm, formatTimeAmPm, formatDateDDMMYYYY } from "@/lib/time";
 
 type CalEvent = {
   id: string;
@@ -230,7 +230,7 @@ export default function ScheduleWorkspace({
 
       <div className="rounded-2xl border border-border bg-surface p-4">
         <h2 className="font-bold text-sm mb-3">
-          {format(parseISO(selected), "EEE, d MMM yyyy")} · {dayEvents.length} record
+          {format(parseISO(selected), "EEE, dd-MM-yyyy")} · {dayEvents.length} record
           {dayEvents.length === 1 ? "" : "s"}
         </h2>
 
@@ -258,7 +258,7 @@ export default function ScheduleWorkspace({
                   </div>
                   <div className="text-[11px] text-muted mt-0.5">
                     By {e.createdBy || "—"}
-                    {e.createdAt ? ` · ${format(parseISO(e.createdAt), "dd MMM, hh:mm a")}` : ""}
+                    {e.createdAt ? ` · ${format(parseISO(e.createdAt), "dd-MM-yyyy, h:mm a")}` : ""}
                   </div>
                 </div>
               ))}
@@ -290,8 +290,8 @@ export default function ScheduleWorkspace({
                       </td>
                       <td className="px-4 py-3 font-semibold">{e.title}</td>
                       <td className="px-4 py-3 text-xs">
-                        {formatSlotAmPm(e.startTime, e.endTime)}
-                        {e.endDate !== e.date ? ` (${e.endDate})` : ""}
+                        {formatDateDDMMYYYY(e.date)} {formatSlotAmPm(e.startTime, e.endTime)}
+                        {e.endDate !== e.date ? ` → ${formatDateDDMMYYYY(e.endDate)}` : ""}
                       </td>
                       <td className="px-4 py-3 font-bold">₹{e.amount.toLocaleString("en-IN")}</td>
                       <td className="px-4 py-3 text-xs">
@@ -301,7 +301,7 @@ export default function ScheduleWorkspace({
                       <td className="px-4 py-3 text-xs">{e.createdBy || "—"}</td>
                       <td className="px-4 py-3 text-xs text-muted">
                         {e.createdAt
-                          ? format(parseISO(e.createdAt), "dd MMM yyyy, hh:mm a")
+                          ? format(parseISO(e.createdAt), "dd-MM-yyyy, h:mm a")
                           : "—"}
                       </td>
                     </tr>

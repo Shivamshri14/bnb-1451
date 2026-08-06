@@ -213,6 +213,41 @@ export function buildDayTimeline(bookings: BookingRecord[], day: string) {
   return segments;
 }
 
+/** Empty gaps for today — only from `now` onward (past slots removed). */
+export function filterEmptySlotsFromNow(
+  slots: Array<{
+    _id: string;
+    checkInDate: string;
+    checkInTime: string;
+    checkOutDate: string;
+    checkOutTime: string;
+    totalHours: number;
+  }>,
+  now = new Date()
+) {
+  return slots
+    .map((slot) => {
+      const slotStart = parseDateTime(slot.checkInDate, slot.checkInTime);
+      const slotEnd = parseDateTime(slot.checkOutDate, slot.checkOutTime);
+      const effectiveStart = slotStart.getTime() < now.getTime() ? now : slotStart;
+
+      if (effectiveStart.getTime() >= slotEnd.getTime()) return null;
+
+      const ms = slotEnd.getTime() - effectiveStart.getTime();
+      if (ms < 30 * 60 * 1000) return null;
+
+      const hours = Math.max(0.5, Math.round((ms / (1000 * 60 * 60)) * 10) / 10);
+
+      return {
+        ...slot,
+        checkInDate: format(effectiveStart, "yyyy-MM-dd"),
+        checkInTime: format(effectiveStart, "HH:mm"),
+        totalHours: hours,
+      };
+    })
+    .filter(Boolean) as typeof slots;
+}
+
 export function mapBookingDoc(doc: any): BookingRecord {
   return {
     _id: String(doc._id),

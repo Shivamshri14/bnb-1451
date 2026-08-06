@@ -325,6 +325,41 @@ export async function cancelBookingAction(id: string) {
   return { success: true };
 }
 
+export async function updateBookingPaymentAction(
+  id: string,
+  paymentStatus: "Pending" | "Paid" | "Partial"
+) {
+  await connectToDatabase();
+  const doc = await Booking.findById(id);
+  if (!doc) return { success: false, error: "Booking not found." };
+
+  const finalAmount = doc.finalAmount || 0;
+  let advancePaid = doc.advancePaid || 0;
+  let remainingAmount = doc.remainingAmount || 0;
+
+  if (paymentStatus === "Paid") {
+    advancePaid = finalAmount;
+    remainingAmount = 0;
+  } else if (paymentStatus === "Pending") {
+    advancePaid = 0;
+    remainingAmount = finalAmount;
+  } else {
+    // Partial — keep advance if any, else half as default
+    if (advancePaid <= 0 || advancePaid >= finalAmount) {
+      advancePaid = Math.round(finalAmount / 2);
+    }
+    remainingAmount = Math.max(0, finalAmount - advancePaid);
+  }
+
+  doc.paymentStatus = paymentStatus;
+  doc.advancePaid = advancePaid;
+  doc.remainingAmount = remainingAmount;
+  await doc.save();
+
+  revalidateAll();
+  return { success: true, data: mapBookingDoc(doc.toObject()) };
+}
+
 export async function getRoomsAction() {
   return { success: true, data: [OG_ROOM] };
 }
