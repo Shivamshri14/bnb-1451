@@ -360,6 +360,30 @@ export async function updateBookingPaymentAction(
   return { success: true, data: mapBookingDoc(doc.toObject()) };
 }
 
+export async function updateBookingAmountQuickAction(id: string, amount: number) {
+  await connectToDatabase();
+  const doc = await Booking.findById(id);
+  if (!doc) return { success: false, error: "Booking not found." };
+  doc.finalAmount = amount;
+  if (doc.paymentStatus === "Paid") {
+    doc.advancePaid = amount;
+    doc.remainingAmount = 0;
+  } else {
+    doc.remainingAmount = Math.max(0, amount - (doc.advancePaid || 0));
+    if (doc.advancePaid >= amount) {
+      doc.paymentStatus = "Paid";
+      doc.remainingAmount = 0;
+    } else if (doc.advancePaid > 0) {
+      doc.paymentStatus = "Partial";
+    } else {
+      doc.paymentStatus = "Pending";
+    }
+  }
+  await doc.save();
+  revalidateAll();
+  return { success: true };
+}
+
 export async function getRoomsAction() {
   return { success: true, data: [OG_ROOM] };
 }

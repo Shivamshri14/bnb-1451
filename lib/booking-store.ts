@@ -60,7 +60,10 @@ export type GapSlot = {
   checkOutDate: string;
   checkOutTime: string;
   totalHours: number;
-  isGap: true;
+  isGap?: boolean;
+  isBooking?: boolean;
+  customerName?: string;
+  via?: string;
 };
 
 export function computeGaps(
@@ -68,7 +71,6 @@ export function computeGaps(
   daysAhead = 3,
   fromDate?: Date
 ): GapSlot[] {
-  const gaps: GapSlot[] = [];
   const sortedActive = [...bookings]
     .filter((b) => b.bookingStatus !== "Cancelled")
     .sort(
@@ -78,47 +80,56 @@ export function computeGaps(
     );
 
   let currentPointer = fromDate ? new Date(fromDate) : new Date();
-  currentPointer.setMinutes(0, 0, 0);
-  const limitTime = addDays(currentPointer, daysAhead);
+  const gaps: GapSlot[] = [];
 
-  for (const booking of sortedActive) {
-    const checkInTimeObj = parseDateTime(booking.checkInDate, booking.checkInTime);
-    const checkOutTimeObj = parseDateTime(booking.checkOutDate, booking.checkOutTime);
+  for (const b of sortedActive) {
+    const start = parseDateTime(b.checkInDate, b.checkInTime);
+    const end = parseDateTime(b.checkOutDate, b.checkOutTime);
 
-    if (isAfter(checkInTimeObj, currentPointer)) {
-      const diffHours = differenceInHours(checkInTimeObj, currentPointer);
-      if (diffHours >= 1) {
-        gaps.push({
-          _id: `gap-${currentPointer.getTime()}`,
-          checkInDate: format(currentPointer, "yyyy-MM-dd"),
-          checkInTime: format(currentPointer, "HH:mm"),
-          checkOutDate: format(checkInTimeObj, "yyyy-MM-dd"),
-          checkOutTime: format(checkInTimeObj, "HH:mm"),
-          totalHours: diffHours,
-          isGap: true,
-        });
-      }
-    }
-
-    if (isAfter(checkOutTimeObj, currentPointer)) {
-      currentPointer = checkOutTimeObj;
-    }
-  }
-
-  if (isBefore(currentPointer, limitTime)) {
-    const diffHours = differenceInHours(limitTime, currentPointer);
-    if (diffHours >= 1) {
+    if (start.getTime() > currentPointer.getTime()) {
+      const exactMs = start.getTime() - currentPointer.getTime();
+      const exactHours = exactMs / (1000 * 60 * 60);
       gaps.push({
-        _id: `gap-final-${currentPointer.getTime()}`,
+        _id: `gap-${currentPointer.getTime()}`,
         checkInDate: format(currentPointer, "yyyy-MM-dd"),
         checkInTime: format(currentPointer, "HH:mm"),
-        checkOutDate: format(limitTime, "yyyy-MM-dd"),
-        checkOutTime: format(limitTime, "HH:mm"),
-        totalHours: diffHours,
+        checkOutDate: format(start, "yyyy-MM-dd"),
+        checkOutTime: format(start, "HH:mm"),
+        totalHours: exactHours,
         isGap: true,
       });
     }
+
+    if (end.getTime() > currentPointer.getTime()) {
+      // If the booking is in the future, push it into the timeline as well!
+      if (start.getTime() >= currentPointer.getTime()) {
+        const exactMs = end.getTime() - start.getTime();
+        const exactHours = exactMs / (1000 * 60 * 60);
+        gaps.push({
+          _id: `booking-${b._id}`,
+          checkInDate: b.checkInDate,
+          checkInTime: b.checkInTime,
+          checkOutDate: b.checkOutDate,
+          checkOutTime: b.checkOutTime,
+          totalHours: exactHours,
+          isBooking: true,
+          customerName: b.customerName,
+          via: b.via || b.bookingSource,
+        });
+      }
+      currentPointer = end;
+    }
   }
+
+  gaps.push({
+    _id: `gap-lifelong-${currentPointer.getTime()}`,
+    checkInDate: format(currentPointer, "yyyy-MM-dd"),
+    checkInTime: format(currentPointer, "HH:mm"),
+    checkOutDate: "",
+    checkOutTime: "Indefinite",
+    totalHours: -1,
+    isGap: true,
+  });
 
   return gaps;
 }
@@ -228,8 +239,17 @@ export function filterEmptySlotsFromNow(
   return slots
     .map((slot) => {
       const slotStart = parseDateTime(slot.checkInDate, slot.checkInTime);
-      const slotEnd = parseDateTime(slot.checkOutDate, slot.checkOutTime);
       const effectiveStart = slotStart.getTime() < now.getTime() ? now : slotStart;
+
+      if (slot.totalHours === -1) {
+        return {
+          ...slot,
+          checkInDate: format(effectiveStart, "yyyy-MM-dd"),
+          checkInTime: format(effectiveStart, "HH:mm"),
+        };
+      }
+
+      const slotEnd = parseDateTime(slot.checkOutDate, slot.checkOutTime);
 
       if (effectiveStart.getTime() >= slotEnd.getTime()) return null;
 

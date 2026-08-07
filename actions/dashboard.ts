@@ -6,7 +6,7 @@ import Booking from "@/models/Booking";
 import CommissionBooking from "@/models/CommissionBooking";
 import Expense from "@/models/Expense";
 import { OG_ROOM } from "@/lib/constants";
-import { mapBookingDoc, buildDayTimeline, filterEmptySlotsFromNow } from "@/lib/booking-store";
+import { mapBookingDoc, buildDayTimeline, filterEmptySlotsFromNow, computeGaps, parseDateTime } from "@/lib/booking-store";
 
 export async function getDashboardStats() {
   await connectToDatabase();
@@ -62,10 +62,26 @@ export async function getDashboardStats() {
     )
     .sort((a, b) => b.remainingAmount - a.remainingAmount);
 
-  const emptySlots = filterEmptySlotsFromNow(
-    buildDayTimeline(bookings, todayStr).filter((s) => s.type === "empty") as any[],
-    now
-  );
+  const timeline = buildDayTimeline(bookings, todayStr);
+  const isOccupied = bookings.some(b => {
+    try {
+      const ci = parseDateTime(b.checkInDate, b.checkInTime);
+      const co = parseDateTime(b.checkOutDate, b.checkOutTime);
+      return b.bookingStatus !== "Cancelled" && ci.getTime() <= now.getTime() && co.getTime() > now.getTime();
+    } catch { return false; }
+  });
+
+  const emptySlots = computeGaps(bookings, 1, now).map(g => ({
+    _id: g._id,
+    checkInDate: g.checkInDate,
+    checkInTime: g.checkInTime,
+    checkOutDate: g.checkOutDate,
+    checkOutTime: g.checkOutTime,
+    totalHours: g.totalHours,
+    isBooking: g.isBooking,
+    isGap: g.isGap,
+    via: g.via,
+  }));
 
   const commissionDocs = await CommissionBooking.find().lean();
   const commissionPaid = commissionDocs
@@ -98,5 +114,7 @@ export async function getDashboardStats() {
     monthExpenses,
     netProfit: earnings - monthExpenses,
     roomLabel: `${OG_ROOM.name} · Room ${OG_ROOM.roomNumber}`,
+    timeline,
+    isOccupied,
   };
 }

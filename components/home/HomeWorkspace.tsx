@@ -71,7 +71,7 @@ export default function HomeWorkspace({ stats, todayLabel }: HomeWorkspaceProps)
         </div>
       </div>
 
-      <EmptySlotsPanel slots={stats.emptySlots || []} onBook={() => setOpen(true)} />
+      <EmptySlotsPanel slots={stats.emptySlots || []} isOccupied={stats.isOccupied} onBook={() => setOpen(true)} />
 
       <BookingRecordsTable
         title="Pending payments"
@@ -88,12 +88,6 @@ export default function HomeWorkspace({ stats, todayLabel }: HomeWorkspaceProps)
         emptyMessage="No bookings recorded for today."
         showPaymentDropdown
         onUpdated={onUpdated}
-      />
-
-      <BookingRecordsTable
-        title="Upcoming bookings"
-        bookings={stats.upcoming || []}
-        emptyMessage="No upcoming bookings."
       />
 
       <QuickRecordModal open={open} onClose={() => setOpen(false)} onSaved={onSaved} />
