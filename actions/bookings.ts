@@ -15,6 +15,7 @@ import {
   buildDayTimeline,
   mapBookingDoc,
   type BookingRecord,
+  getISTDateString,
 } from "@/lib/booking-store";
 import { createCommissionAction } from "./commissions";
 
@@ -56,7 +57,7 @@ export async function getBookingsAction(filters?: {
 
   const docs = await Booking.find(query).sort({ createdAt: -1 }).lean();
   const list = docs.map(mapBookingDoc);
-  const day = filters?.day || format(new Date(), "yyyy-MM-dd");
+  const day = filters?.day || getISTDateString(new Date());
 
   return {
     success: true,
@@ -88,17 +89,13 @@ export async function createQuickRecordAction(data: QuickRecordInput) {
   const via = d.via || "";
   const roomNumber = d.roomNumber?.trim() || "1451";
 
-  // Server-side: check-out cannot be in the past
-  const now = new Date();
-  if (end.getTime() <= now.getTime()) {
-    return { success: false, error: "Check-out cannot be in the past." };
-  }
+
 
   if (d.entryType === "commission") {
     return createCommissionAction({
       propertyName: `Room ${roomNumber}`,
       customerName,
-      bookingDate: format(new Date(), "yyyy-MM-dd"),
+      bookingDate: getISTDateString(new Date()),
       checkInDate: d.checkInDate,
       checkInTime: d.checkInTime,
       checkOutDate: d.checkOutDate,

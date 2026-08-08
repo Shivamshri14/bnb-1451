@@ -6,6 +6,7 @@ import { format, parseISO, differenceInHours, isAfter, isBefore, startOfDay, end
 import { auth } from "@/auth";
 import { connectToDatabase } from "@/lib/db";
 import CommissionBooking from "@/models/CommissionBooking";
+import { getISTDateString } from "@/lib/booking-store";
 
 export type CommissionRecord = {
   _id: string;
@@ -59,7 +60,11 @@ function mapCommission(doc: any): CommissionRecord {
 }
 
 function parseDT(date: string, time: string) {
-  return parseISO(`${date}T${time}:00`);
+  const base = `${date}T${time}:00`;
+  if (base.includes("+") || base.includes("Z") || /-\d{2}:\d{2}$/.test(base)) {
+    return parseISO(base);
+  }
+  return parseISO(`${base}+05:30`);
 }
 
 function buildCommissionDayTimeline(list: CommissionRecord[], day: string) {
@@ -162,7 +167,7 @@ export async function getCommissionsAction(filters?: {
 
   const docs = await CommissionBooking.find(query).sort({ createdAt: -1 }).lean();
   const list = docs.map(mapCommission);
-  const day = filters?.day || format(new Date(), "yyyy-MM-dd");
+  const day = filters?.day || getISTDateString(new Date());
 
   return {
     success: true,

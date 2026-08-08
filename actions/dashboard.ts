@@ -6,7 +6,7 @@ import Booking from "@/models/Booking";
 import CommissionBooking from "@/models/CommissionBooking";
 import Expense from "@/models/Expense";
 import { OG_ROOM } from "@/lib/constants";
-import { mapBookingDoc, buildDayTimeline, filterEmptySlotsFromNow, computeGaps, parseDateTime } from "@/lib/booking-store";
+import { mapBookingDoc, buildDayTimeline, filterEmptySlotsFromNow, computeGaps, parseDateTime, getISTDateString } from "@/lib/booking-store";
 
 export async function getDashboardStats() {
   await connectToDatabase();
@@ -17,22 +17,21 @@ export async function getDashboardStats() {
   const bookings = bookingDocs.map(mapBookingDoc);
 
   const now = new Date();
-  const todayStr = format(now, "yyyy-MM-dd");
-  const startOfThisMonth = startOfMonth(now);
-  const endOfThisMonth = endOfMonth(now);
+  const todayStr = getISTDateString(now);
+
+  const [year, month] = todayStr.split("-");
+  const startOfThisMonth = parseISO(`${year}-${month}-01T00:00:00+05:30`);
+  const istToday = parseISO(`${todayStr}T12:00:00+05:30`);
+  const endOfThisMonthDate = endOfMonth(istToday);
+  const endOfThisMonthStr = format(endOfThisMonthDate, "yyyy-MM-dd") + "T23:59:59";
+  const endOfThisMonth = parseISO(`${endOfThisMonthStr}+05:30`);
 
   const todayHistory = bookings
     .filter((b) => b.checkInDate === todayStr)
     .sort((a, b) => a.checkInTime.localeCompare(b.checkInTime));
 
   const upcoming = bookings
-    .filter((b) => {
-      try {
-        return parseISO(b.checkInDate) > endOfDay(now);
-      } catch {
-        return b.checkInDate > todayStr;
-      }
-    })
+    .filter((b) => b.checkInDate > todayStr)
     .sort((a, b) =>
       `${a.checkInDate}${a.checkInTime}`.localeCompare(`${b.checkInDate}${b.checkInTime}`)
     )
@@ -40,7 +39,7 @@ export async function getDashboardStats() {
 
   const monthBookings = bookings.filter((b) => {
     try {
-      const created = b.createdAt ? parseISO(b.createdAt) : parseISO(b.checkInDate);
+      const created = b.createdAt ? parseISO(b.createdAt) : parseISO(`${b.checkInDate}T00:00:00+05:30`);
       return isWithinInterval(created, { start: startOfThisMonth, end: endOfThisMonth });
     } catch {
       return b.checkInDate >= format(startOfThisMonth, "yyyy-MM-dd");

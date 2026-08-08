@@ -49,16 +49,8 @@ export const bookingSchema = z
   notes: z.string().optional().default(""),
   finalAmount: z.coerce.number().min(0).optional(),
 }).superRefine((data, ctx) => {
-  const checkIn = new Date(`${data.checkInDate}T${data.checkInTime}:00`);
-  const checkOut = new Date(`${data.checkOutDate}T${data.checkOutTime}:00`);
-  const now = new Date();
-  if (!Number.isNaN(checkOut.getTime()) && checkOut.getTime() <= now.getTime()) {
-    ctx.addIssue({
-      code: "custom",
-      message: "Check-out cannot be in the past",
-      path: ["checkOutDate"],
-    });
-  }
+  const checkIn = new Date(`${data.checkInDate}T${data.checkInTime}:00+05:30`);
+  const checkOut = new Date(`${data.checkOutDate}T${data.checkOutTime}:00+05:30`);
   if (
     !Number.isNaN(checkIn.getTime()) &&
     !Number.isNaN(checkOut.getTime()) &&
@@ -109,9 +101,8 @@ export const quickRecordSchema = z
     via: z.enum(["", "Group", "Airbnb App", "Instagram", "Referer"]).optional().default(""),
   })
   .superRefine((data, ctx) => {
-    const checkIn = new Date(`${data.checkInDate}T${data.checkInTime}:00`);
-    const checkOut = new Date(`${data.checkOutDate}T${data.checkOutTime}:00`);
-    const now = new Date();
+    const checkIn = new Date(`${data.checkInDate}T${data.checkInTime}:00+05:30`);
+    const checkOut = new Date(`${data.checkOutDate}T${data.checkOutTime}:00+05:30`);
 
     if (Number.isNaN(checkOut.getTime())) {
       ctx.addIssue({
@@ -120,13 +111,6 @@ export const quickRecordSchema = z
         path: ["checkOutDate"],
       });
     } else {
-      if (checkOut.getTime() <= now.getTime()) {
-        ctx.addIssue({
-          code: "custom",
-          message: "Check-out cannot be in the past",
-          path: ["checkOutDate"],
-        });
-      }
       if (!Number.isNaN(checkIn.getTime()) && checkOut.getTime() <= checkIn.getTime()) {
         ctx.addIssue({
           code: "custom",

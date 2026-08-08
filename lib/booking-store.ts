@@ -40,8 +40,27 @@ export type BookingRecord = {
   createdBy?: string;
 };
 
+export function getISTDateString(date = new Date()): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+
+  const partMap: Record<string, string> = {};
+  for (const part of parts) {
+    partMap[part.type] = part.value;
+  }
+  return `${partMap.year}-${partMap.month}-${partMap.day}`;
+}
+
 export function parseDateTime(dateStr: string, timeStr: string): Date {
-  return parseISO(`${dateStr}T${timeStr}:00`);
+  const base = `${dateStr}T${timeStr}:00`;
+  if (base.includes("+") || base.includes("Z") || /-\d{2}:\d{2}$/.test(base)) {
+    return parseISO(base);
+  }
+  return parseISO(`${base}+05:30`);
 }
 
 export function isSlotOverlapping(
