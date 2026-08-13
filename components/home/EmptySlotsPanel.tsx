@@ -1,9 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { format } from "date-fns";
-import { Clock, CheckCircle2, AlertCircle, ArrowRight } from "lucide-react";
-import { formatSlotAmPm, formatTimeAmPm } from "@/lib/time";
+import { format, parse } from "date-fns";
+import { CheckCircle2, AlertCircle, ArrowRight } from "lucide-react";
 
 const QUOTES = [
   "Every second lost, is a money lost.",
@@ -69,19 +67,17 @@ export default function EmptySlotsPanel({ slots, isOccupied = false, onBook }: E
           {slots.map((slot, index) => {
             const isLifelong = slot.totalHours === -1;
             const isBooking = slot.isBooking;
-            const startStr = `${slot.checkInDate}T${slot.checkInTime}:00`;
             
             let startFmt = `${slot.checkInDate} ${slot.checkInTime}`;
             try {
-              const sDate = new Date(startStr);
+              const sDate = parse(`${slot.checkInDate} ${slot.checkInTime}`, "yyyy-MM-dd HH:mm", new Date());
               startFmt = format(sDate, "dd MMM, h:mm a");
             } catch (e) {}
 
             let endFmt = isLifelong ? "Indefinite" : `${slot.checkOutDate} ${slot.checkOutTime}`;
             try {
               if (!isLifelong) {
-                const endStr = `${slot.checkOutDate}T${slot.checkOutTime}:00`;
-                const eDate = new Date(endStr);
+                const eDate = parse(`${slot.checkOutDate} ${slot.checkOutTime}`, "yyyy-MM-dd HH:mm", new Date());
                 endFmt = format(eDate, "dd MMM, h:mm a");
               }
             } catch (e) {}

@@ -12,6 +12,7 @@ import {
 } from "@/actions/commissions";
 import { toast } from "sonner";
 import { format, parseISO } from "date-fns";
+import { formatDateDDMMYYYY } from "@/lib/time";
 import {
   Plus,
   Search,
@@ -117,10 +118,10 @@ export default function CommissionWorkspace({
     reset({
       propertyName: "Og Stays (Room 1451)",
       customerName: "",
-      bookingDate: format(new Date(), "yyyy-MM-dd"),
-      checkInDate: slot?.checkInDate || day,
+      bookingDate: formatDateDDMMYYYY(format(new Date(), "yyyy-MM-dd")),
+      checkInDate: formatDateDDMMYYYY(slot?.checkInDate || day),
       checkInTime: slot?.checkInTime || "10:00",
-      checkOutDate: slot?.checkOutDate || day,
+      checkOutDate: formatDateDDMMYYYY(slot?.checkOutDate || day),
       checkOutTime: slot?.checkOutTime === "23:59" ? "16:00" : slot?.checkOutTime || "16:00",
       bookingAmount: 1200,
       commissionPercentage: 15,
@@ -137,16 +138,22 @@ export default function CommissionWorkspace({
     reset({
       propertyName: item.propertyName,
       customerName: item.customerName,
-      bookingDate: item.bookingDate?.includes("T")
-        ? format(parseISO(item.bookingDate), "yyyy-MM-dd")
-        : item.bookingDate,
-      checkInDate: item.checkInDate?.includes("T")
-        ? format(parseISO(item.checkInDate), "yyyy-MM-dd")
-        : item.checkInDate,
+      bookingDate: formatDateDDMMYYYY(
+        item.bookingDate?.includes("T")
+          ? format(parseISO(item.bookingDate), "yyyy-MM-dd")
+          : item.bookingDate
+      ),
+      checkInDate: formatDateDDMMYYYY(
+        item.checkInDate?.includes("T")
+          ? format(parseISO(item.checkInDate), "yyyy-MM-dd")
+          : item.checkInDate
+      ),
       checkInTime: item.checkInTime || "10:00",
-      checkOutDate: item.checkOutDate?.includes("T")
-        ? format(parseISO(item.checkOutDate), "yyyy-MM-dd")
-        : item.checkOutDate,
+      checkOutDate: formatDateDDMMYYYY(
+        item.checkOutDate?.includes("T")
+          ? format(parseISO(item.checkOutDate), "yyyy-MM-dd")
+          : item.checkOutDate
+      ),
       checkOutTime: item.checkOutTime || "16:00",
       bookingAmount: item.bookingAmount,
       commissionPercentage: item.commissionPercentage,
@@ -404,7 +411,7 @@ export default function CommissionWorkspace({
               <div className="rounded-xl border border-accent/20 bg-accent-soft/40 p-3 grid grid-cols-2 gap-2">
                 <div>
                   <label className="text-[10px] font-bold text-accent uppercase">Check-in date</label>
-                  <input type="date" {...register("checkInDate")} className="w-full mt-1 px-2 py-1.5 text-xs rounded-lg border border-border bg-surface" />
+                  <input type="text" placeholder="DD-MM-YYYY" {...register("checkInDate")} className="w-full mt-1 px-2 py-1.5 text-xs rounded-lg border border-border bg-surface" />
                 </div>
                 <div>
                   <label className="text-[10px] font-bold text-accent uppercase">Time</label>
@@ -412,7 +419,7 @@ export default function CommissionWorkspace({
                 </div>
                 <div>
                   <label className="text-[10px] font-bold text-accent uppercase">Check-out date</label>
-                  <input type="date" {...register("checkOutDate")} className="w-full mt-1 px-2 py-1.5 text-xs rounded-lg border border-border bg-surface" />
+                  <input type="text" placeholder="DD-MM-YYYY" {...register("checkOutDate")} className="w-full mt-1 px-2 py-1.5 text-xs rounded-lg border border-border bg-surface" />
                 </div>
                 <div>
                   <label className="text-[10px] font-bold text-accent uppercase">Time</label>

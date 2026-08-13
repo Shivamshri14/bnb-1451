@@ -6,7 +6,7 @@ import { format, parseISO, differenceInHours, isAfter, isBefore, startOfDay, end
 import { auth } from "@/auth";
 import { connectToDatabase } from "@/lib/db";
 import CommissionBooking from "@/models/CommissionBooking";
-import { getISTDateString } from "@/lib/booking-store";
+import { getISTDateString, formatISTDate, formatISTTime } from "@/lib/booking-store";
 
 export type CommissionRecord = {
   _id: string;
@@ -68,8 +68,8 @@ function parseDT(date: string, time: string) {
 }
 
 function buildCommissionDayTimeline(list: CommissionRecord[], day: string) {
-  const dayStart = startOfDay(parseISO(day));
-  const dayEnd = endOfDay(parseISO(day));
+  const dayStart = parseDT(day, "00:00");
+  const dayEnd = parseDT(day, "23:59");
 
   const overlapping = list
     .map((c) => {
@@ -84,10 +84,10 @@ function buildCommissionDayTimeline(list: CommissionRecord[], day: string) {
       return {
         type: "booked" as const,
         _id: c._id,
-        checkInDate: format(clippedStart, "yyyy-MM-dd"),
-        checkInTime: format(clippedStart, "HH:mm"),
-        checkOutDate: format(clippedEnd, "yyyy-MM-dd"),
-        checkOutTime: format(clippedEnd, "HH:mm"),
+        checkInDate: formatISTDate(clippedStart),
+        checkInTime: formatISTTime(clippedStart),
+        checkOutDate: formatISTDate(clippedEnd),
+        checkOutTime: formatISTTime(clippedEnd),
         totalHours: Math.max(1, differenceInHours(clippedEnd, clippedStart) || 1),
         amount: c.commissionAmount,
         customerName: c.customerName,
@@ -113,10 +113,10 @@ function buildCommissionDayTimeline(list: CommissionRecord[], day: string) {
         segments.push({
           type: "empty",
           _id: `c-empty-${cursor.getTime()}`,
-          checkInDate: format(cursor, "yyyy-MM-dd"),
-          checkInTime: format(cursor, "HH:mm"),
-          checkOutDate: format(blockStart, "yyyy-MM-dd"),
-          checkOutTime: format(blockStart, "HH:mm"),
+          checkInDate: formatISTDate(cursor),
+          checkInTime: formatISTTime(cursor),
+          checkOutDate: formatISTDate(blockStart),
+          checkOutTime: formatISTTime(blockStart),
           totalHours: Math.max(1, hours || 1),
         });
       }
@@ -131,9 +131,9 @@ function buildCommissionDayTimeline(list: CommissionRecord[], day: string) {
       segments.push({
         type: "empty",
         _id: `c-empty-end-${cursor.getTime()}`,
-        checkInDate: format(cursor, "yyyy-MM-dd"),
-        checkInTime: format(cursor, "HH:mm"),
-        checkOutDate: format(dayEnd, "yyyy-MM-dd"),
+        checkInDate: formatISTDate(cursor),
+        checkInTime: formatISTTime(cursor),
+        checkOutDate: formatISTDate(dayEnd),
         checkOutTime: "23:59",
         totalHours: hours,
       });

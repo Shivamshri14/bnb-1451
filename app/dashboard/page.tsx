@@ -2,7 +2,6 @@ import { getDashboardStats } from "@/actions/dashboard";
 import HomeWorkspace from "@/components/home/HomeWorkspace";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
-import { format } from "date-fns";
 
 export const revalidate = 0;
 
@@ -11,6 +10,12 @@ export default async function DashboardPage() {
   if (!session) redirect("/login");
 
   const stats = await getDashboardStats();
-  const todayLabel = format(new Date(), "EEEE, d MMMM yyyy");
+  const todayLabel = new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
   return <HomeWorkspace stats={stats} todayLabel={todayLabel} />;
 }

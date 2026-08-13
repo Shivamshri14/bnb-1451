@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { format } from "date-fns";
 import { Plus, IndianRupee } from "lucide-react";
 import QuickRecordModal from "./QuickRecordModal";
 import EmptySlotsPanel from "./EmptySlotsPanel";
@@ -19,7 +18,15 @@ export default function HomeWorkspace({ stats, todayLabel }: HomeWorkspaceProps)
   const router = useRouter();
 
   useEffect(() => {
-    setDateLabel(format(new Date(), "EEEE, d MMMM yyyy"));
+    setDateLabel(
+      new Intl.DateTimeFormat("en-IN", {
+        timeZone: "Asia/Kolkata",
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      }).format(new Date())
+    );
   }, []);
 
   const money = (v: number) =>

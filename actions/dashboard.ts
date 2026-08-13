@@ -6,7 +6,7 @@ import Booking from "@/models/Booking";
 import CommissionBooking from "@/models/CommissionBooking";
 import Expense from "@/models/Expense";
 import { OG_ROOM } from "@/lib/constants";
-import { mapBookingDoc, buildDayTimeline, filterEmptySlotsFromNow, computeGaps, parseDateTime, getISTDateString } from "@/lib/booking-store";
+import { mapBookingDoc, buildDayTimeline, filterEmptySlotsFromNow, computeGaps, parseDateTime, getISTDateString, formatISTDate } from "@/lib/booking-store";
 
 export async function getDashboardStats() {
   await connectToDatabase();
@@ -23,7 +23,7 @@ export async function getDashboardStats() {
   const startOfThisMonth = parseISO(`${year}-${month}-01T00:00:00+05:30`);
   const istToday = parseISO(`${todayStr}T12:00:00+05:30`);
   const endOfThisMonthDate = endOfMonth(istToday);
-  const endOfThisMonthStr = format(endOfThisMonthDate, "yyyy-MM-dd") + "T23:59:59";
+  const endOfThisMonthStr = formatISTDate(endOfThisMonthDate) + "T23:59:59";
   const endOfThisMonth = parseISO(`${endOfThisMonthStr}+05:30`);
 
   const todayHistory = bookings
@@ -42,7 +42,7 @@ export async function getDashboardStats() {
       const created = b.createdAt ? parseISO(b.createdAt) : parseISO(`${b.checkInDate}T00:00:00+05:30`);
       return isWithinInterval(created, { start: startOfThisMonth, end: endOfThisMonth });
     } catch {
-      return b.checkInDate >= format(startOfThisMonth, "yyyy-MM-dd");
+      return b.checkInDate >= formatISTDate(startOfThisMonth);
     }
   });
 

@@ -1,12 +1,8 @@
 import {
   parseISO,
   differenceInHours,
-  addDays,
-  format,
   isAfter,
   isBefore,
-  startOfDay,
-  endOfDay,
 } from "date-fns";
 import { OG_ROOM } from "./constants";
 
@@ -53,6 +49,39 @@ export function getISTDateString(date = new Date()): string {
     partMap[part.type] = part.value;
   }
   return `${partMap.year}-${partMap.month}-${partMap.day}`;
+}
+
+export function formatISTDate(date: Date): string {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const parts = formatter.formatToParts(date);
+  const map: Record<string, string> = {};
+  for (const part of parts) {
+    map[part.type] = part.value;
+  }
+  return `${map.year}-${map.month}-${map.day}`;
+}
+
+export function formatISTTime(date: Date): string {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Kolkata",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
+  const parts = formatter.formatToParts(date);
+  const map: Record<string, string> = {};
+  for (const part of parts) {
+    map[part.type] = part.value;
+  }
+  let hour = map.hour;
+  if (hour === "24") hour = "00";
+  return `${hour}:${map.minute}`;
 }
 
 export function parseDateTime(dateStr: string, timeStr: string): Date {
@@ -110,10 +139,10 @@ export function computeGaps(
       const exactHours = exactMs / (1000 * 60 * 60);
       gaps.push({
         _id: `gap-${currentPointer.getTime()}`,
-        checkInDate: format(currentPointer, "yyyy-MM-dd"),
-        checkInTime: format(currentPointer, "HH:mm"),
-        checkOutDate: format(start, "yyyy-MM-dd"),
-        checkOutTime: format(start, "HH:mm"),
+        checkInDate: formatISTDate(currentPointer),
+        checkInTime: formatISTTime(currentPointer),
+        checkOutDate: formatISTDate(start),
+        checkOutTime: formatISTTime(start),
         totalHours: exactHours,
         isGap: true,
       });
@@ -142,8 +171,8 @@ export function computeGaps(
 
   gaps.push({
     _id: `gap-lifelong-${currentPointer.getTime()}`,
-    checkInDate: format(currentPointer, "yyyy-MM-dd"),
-    checkInTime: format(currentPointer, "HH:mm"),
+    checkInDate: formatISTDate(currentPointer),
+    checkInTime: formatISTTime(currentPointer),
     checkOutDate: "",
     checkOutTime: "Indefinite",
     totalHours: -1,
@@ -154,8 +183,8 @@ export function computeGaps(
 }
 
 export function buildDayTimeline(bookings: BookingRecord[], day: string) {
-  const dayStart = startOfDay(parseISO(day));
-  const dayEnd = endOfDay(parseISO(day));
+  const dayStart = parseDateTime(day, "00:00");
+  const dayEnd = parseDateTime(day, "23:59");
 
   const overlapping = bookings
     .filter((b) => b.bookingStatus !== "Cancelled")
@@ -171,10 +200,10 @@ export function buildDayTimeline(bookings: BookingRecord[], day: string) {
       return {
         type: "booked" as const,
         _id: booking._id,
-        checkInDate: format(clippedStart, "yyyy-MM-dd"),
-        checkInTime: format(clippedStart, "HH:mm"),
-        checkOutDate: format(clippedEnd, "yyyy-MM-dd"),
-        checkOutTime: format(clippedEnd, "HH:mm"),
+        checkInDate: formatISTDate(clippedStart),
+        checkInTime: formatISTTime(clippedStart),
+        checkOutDate: formatISTDate(clippedEnd),
+        checkOutTime: formatISTTime(clippedEnd),
         totalHours: Math.max(1, differenceInHours(clippedEnd, clippedStart) || 1),
         amount: booking.finalAmount,
         customerName: booking.customerName,
@@ -213,10 +242,10 @@ export function buildDayTimeline(bookings: BookingRecord[], day: string) {
         segments.push({
           type: "empty",
           _id: `empty-${cursor.getTime()}`,
-          checkInDate: format(cursor, "yyyy-MM-dd"),
-          checkInTime: format(cursor, "HH:mm"),
-          checkOutDate: format(blockStart, "yyyy-MM-dd"),
-          checkOutTime: format(blockStart, "HH:mm"),
+          checkInDate: formatISTDate(cursor),
+          checkInTime: formatISTTime(cursor),
+          checkOutDate: formatISTDate(blockStart),
+          checkOutTime: formatISTTime(blockStart),
           totalHours: Math.max(1, hours || 1),
         });
       }
@@ -231,9 +260,9 @@ export function buildDayTimeline(bookings: BookingRecord[], day: string) {
       segments.push({
         type: "empty",
         _id: `empty-end-${cursor.getTime()}`,
-        checkInDate: format(cursor, "yyyy-MM-dd"),
-        checkInTime: format(cursor, "HH:mm"),
-        checkOutDate: format(dayEnd, "yyyy-MM-dd"),
+        checkInDate: formatISTDate(cursor),
+        checkInTime: formatISTTime(cursor),
+        checkOutDate: formatISTDate(dayEnd),
         checkOutTime: "23:59",
         totalHours: hours,
       });
@@ -263,8 +292,8 @@ export function filterEmptySlotsFromNow(
       if (slot.totalHours === -1) {
         return {
           ...slot,
-          checkInDate: format(effectiveStart, "yyyy-MM-dd"),
-          checkInTime: format(effectiveStart, "HH:mm"),
+          checkInDate: formatISTDate(effectiveStart),
+          checkInTime: formatISTTime(effectiveStart),
         };
       }
 
@@ -279,8 +308,8 @@ export function filterEmptySlotsFromNow(
 
       return {
         ...slot,
-        checkInDate: format(effectiveStart, "yyyy-MM-dd"),
-        checkInTime: format(effectiveStart, "HH:mm"),
+        checkInDate: formatISTDate(effectiveStart),
+        checkInTime: formatISTTime(effectiveStart),
         totalHours: hours,
       };
     })

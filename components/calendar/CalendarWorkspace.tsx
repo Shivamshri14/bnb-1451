@@ -13,6 +13,7 @@ import DayTimeline, { TimelineSegment } from "@/components/schedule/DayTimeline"
 import { buildDayTimeline } from "@/lib/booking-store";
 import { OG_ROOM } from "@/lib/constants";
 import { differenceInHours, parseISO } from "date-fns";
+import { formatDateDDMMYYYY } from "@/lib/time";
 
 const FullCalendar = dynamic(() => import("@fullcalendar/react"), {
   ssr: false,
@@ -135,9 +136,9 @@ export default function CalendarWorkspace({ bookings: initialBookings }: Calenda
       idProof: "",
       room: OG_ROOM._id,
       bookingSource: "Direct",
-      checkInDate: slot.checkInDate,
+      checkInDate: formatDateDDMMYYYY(slot.checkInDate),
       checkInTime: slot.checkInTime,
-      checkOutDate: slot.checkOutDate,
+      checkOutDate: formatDateDDMMYYYY(slot.checkOutDate),
       checkOutTime: slot.checkOutTime === "23:59" ? "22:00" : slot.checkOutTime,
       roomPrice: 200,
       discount: 0,
@@ -232,9 +233,9 @@ export default function CalendarWorkspace({ bookings: initialBookings }: Calenda
               </div>
               <input {...register("phoneNumber")} required placeholder="Phone" className="w-full px-3 py-2 text-sm rounded-xl border border-border bg-surface-muted/40 focus:outline-none focus:ring-2 focus:ring-brand" />
               <div className="grid grid-cols-2 gap-2 rounded-xl border border-brand/20 bg-brand-soft/40 p-3">
-                <input type="date" {...register("checkInDate")} className="px-2 py-1.5 text-xs rounded-lg border border-border bg-surface" />
+                <input type="text" placeholder="DD-MM-YYYY" {...register("checkInDate")} className="px-2 py-1.5 text-xs rounded-lg border border-border bg-surface" />
                 <input type="time" {...register("checkInTime")} className="px-2 py-1.5 text-xs rounded-lg border border-border bg-surface font-bold" />
-                <input type="date" {...register("checkOutDate")} className="px-2 py-1.5 text-xs rounded-lg border border-border bg-surface" />
+                <input type="text" placeholder="DD-MM-YYYY" {...register("checkOutDate")} className="px-2 py-1.5 text-xs rounded-lg border border-border bg-surface" />
                 <input type="time" {...register("checkOutTime")} className="px-2 py-1.5 text-xs rounded-lg border border-border bg-surface font-bold" />
               </div>
               <div className="grid grid-cols-2 gap-2">

@@ -168,9 +168,9 @@ export default function BookingWorkspace({ initialBookings }: BookingWorkspacePr
       idProof: "",
       room: OG_ROOM._id,
       bookingSource: "Direct",
-      checkInDate: slot?.checkInDate || day,
+       checkInDate: formatDateDDMMYYYY(slot?.checkInDate || day),
       checkInTime: slot?.checkInTime || "10:00",
-      checkOutDate: slot?.checkOutDate || day,
+      checkOutDate: formatDateDDMMYYYY(slot?.checkOutDate || day),
       checkOutTime: slot?.checkOutTime === "23:59" ? "22:00" : slot?.checkOutTime || "16:00",
       roomPrice: 200,
       discount: 0,
@@ -193,9 +193,9 @@ export default function BookingWorkspace({ initialBookings }: BookingWorkspacePr
       idProof: booking.idProof || "",
       room: OG_ROOM._id,
       bookingSource: booking.bookingSource,
-      checkInDate: booking.checkInDate,
+      checkInDate: formatDateDDMMYYYY(booking.checkInDate),
       checkInTime: booking.checkInTime || "10:00",
-      checkOutDate: booking.checkOutDate,
+      checkOutDate: formatDateDDMMYYYY(booking.checkOutDate),
       checkOutTime: booking.checkOutTime || "16:00",
       roomPrice: booking.roomPrice,
       discount: booking.discount,
@@ -475,7 +475,7 @@ export default function BookingWorkspace({ initialBookings }: BookingWorkspacePr
               <div className="rounded-xl border border-brand/20 bg-brand-soft/50 p-3 grid grid-cols-2 gap-2">
                 <div>
                   <label className="text-[10px] font-bold text-brand uppercase">Check-in date</label>
-                  <input type="date" {...register("checkInDate")} className="w-full mt-1 px-2 py-1.5 text-xs rounded-lg border border-border bg-surface" />
+                  <input type="text" placeholder="DD-MM-YYYY" {...register("checkInDate")} className="w-full mt-1 px-2 py-1.5 text-xs rounded-lg border border-border bg-surface" />
                 </div>
                 <div>
                   <label className="text-[10px] font-bold text-brand uppercase">Time</label>
@@ -483,7 +483,7 @@ export default function BookingWorkspace({ initialBookings }: BookingWorkspacePr
                 </div>
                 <div>
                   <label className="text-[10px] font-bold text-brand uppercase">Check-out date</label>
-                  <input type="date" {...register("checkOutDate")} className="w-full mt-1 px-2 py-1.5 text-xs rounded-lg border border-border bg-surface" />
+                  <input type="text" placeholder="DD-MM-YYYY" {...register("checkOutDate")} className="w-full mt-1 px-2 py-1.5 text-xs rounded-lg border border-border bg-surface" />
                 </div>
                 <div>
                   <label className="text-[10px] font-bold text-brand uppercase">Time</label>

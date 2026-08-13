@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { indianPhoneMessage, normalizeIndianPhone } from "./phone";
+import { normalizeDateInput } from "./time";
 
 const indianPhone = z
   .string()
@@ -35,9 +36,9 @@ export const bookingSchema = z
   idProof: z.string().optional().default(""),
   room: z.string().optional().default("1451"),
   bookingSource: z.enum(["Direct", "Airbnb", "Booking.com", "Agoda", "Other"]).default("Direct"),
-  checkInDate: z.string().min(1, "Check-in date is required"),
+  checkInDate: z.string().min(1, "Check-in date is required").transform(normalizeDateInput),
   checkInTime: z.string().min(1, "Check-in time is required"),
-  checkOutDate: z.string().min(1, "Check-out date is required"),
+  checkOutDate: z.string().min(1, "Check-out date is required").transform(normalizeDateInput),
   checkOutTime: z.string().min(1, "Check-out time is required"),
   roomPrice: z.coerce.number().min(0).default(0),
   discount: z.coerce.number().min(0).default(0),
@@ -69,10 +70,10 @@ export type BookingInput = z.infer<typeof bookingSchema>;
 export const commissionSchema = z.object({
   propertyName: z.string().min(1).trim().default("Og Stays (Room 1451)"),
   customerName: z.string().trim().optional().default(""),
-  bookingDate: z.string().min(1),
-  checkInDate: z.string().min(1),
+  bookingDate: z.string().min(1).transform(normalizeDateInput),
+  checkInDate: z.string().min(1).transform(normalizeDateInput),
   checkInTime: z.string().min(1).default("10:00"),
-  checkOutDate: z.string().min(1),
+  checkOutDate: z.string().min(1).transform(normalizeDateInput),
   checkOutTime: z.string().min(1).default("16:00"),
   bookingAmount: z.coerce.number().min(0),
   commissionPercentage: z.coerce.number().min(0).max(100).default(10),
@@ -89,9 +90,9 @@ export type CommissionInput = z.infer<typeof commissionSchema>;
 export const quickRecordSchema = z
   .object({
     entryType: z.enum(["booking", "commission"]),
-    checkInDate: z.string().min(1, "Check-in date required"),
+    checkInDate: z.string().min(1, "Check-in date required").transform(normalizeDateInput),
     checkInTime: z.string().min(1, "Check-in time required"),
-    checkOutDate: z.string().min(1, "Check-out date required"),
+    checkOutDate: z.string().min(1, "Check-out date required").transform(normalizeDateInput),
     checkOutTime: z.string().min(1, "Check-out time required"),
     amount: z.coerce.number().min(1, "Amount is required"),
     paymentStatus: z.enum(["Received", "Pending"]),

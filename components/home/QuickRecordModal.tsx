@@ -10,6 +10,7 @@ import { quickRecordSchema, QuickRecordInput } from "@/lib/validations";
 import { createQuickRecordAction } from "@/actions/bookings";
 import { normalizeIndianPhone } from "@/lib/phone";
 import { VIA_OPTIONS } from "@/lib/via";
+import { formatDateDDMMYYYY } from "@/lib/time";
 
 interface QuickRecordModalProps {
   open: boolean;
@@ -19,7 +20,7 @@ interface QuickRecordModalProps {
 
 export default function QuickRecordModal({ open, onClose, onSaved }: QuickRecordModalProps) {
   const [isPending, startTransition] = useTransition();
-  const today = format(new Date(), "yyyy-MM-dd");
+  const today = formatDateDDMMYYYY(format(new Date(), "yyyy-MM-dd"));
 
   const {
     register,
@@ -115,16 +116,16 @@ export default function QuickRecordModal({ open, onClose, onSaved }: QuickRecord
 
           <div className="grid grid-cols-4 gap-1.5">
             <div className="col-span-2">
-              <label className="text-[9px] font-bold text-muted uppercase">In date</label>
-              <input type="date" {...register("checkInDate")} className="w-full mt-0.5 px-1.5 py-1.5 text-[11px] rounded-lg border border-border bg-surface-muted/30" />
+              <label className="text-[9px] font-bold text-muted uppercase">In date (DD-MM-YYYY)</label>
+              <input type="text" placeholder="DD-MM-YYYY" {...register("checkInDate")} className="w-full mt-0.5 px-1.5 py-1.5 text-[11px] rounded-lg border border-border bg-surface-muted/30" />
             </div>
             <div className="col-span-2">
               <label className="text-[9px] font-bold text-muted uppercase">In time</label>
               <input type="time" {...register("checkInTime")} className="w-full mt-0.5 px-1.5 py-1.5 text-[11px] rounded-lg border border-border bg-surface-muted/30 font-bold" />
             </div>
             <div className="col-span-2">
-              <label className="text-[9px] font-bold text-muted uppercase">Out date</label>
-              <input type="date" {...register("checkOutDate")} className="w-full mt-0.5 px-1.5 py-1.5 text-[11px] rounded-lg border border-border bg-surface-muted/30" />
+              <label className="text-[9px] font-bold text-muted uppercase">Out date (DD-MM-YYYY)</label>
+              <input type="text" placeholder="DD-MM-YYYY" {...register("checkOutDate")} className="w-full mt-0.5 px-1.5 py-1.5 text-[11px] rounded-lg border border-border bg-surface-muted/30" />
             </div>
             <div className="col-span-2">
               <label className="text-[9px] font-bold text-muted uppercase">Out time</label>

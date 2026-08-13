@@ -45,3 +45,40 @@ export function formatDateTimeAmPm(dateStr?: string | null, timeStr?: string | n
   if (d && t) return `${d} ${t}`;
   return d || t;
 }
+
+/** Parse user input date string to yyyy-MM-dd.
+ * Supports:
+ * - DD-MM-YYYY (e.g. 13-08-2026)
+ * - DD/MM/YYYY (e.g. 13/08/2026)
+ * - DDMMYYYY (e.g. 13082026)
+ * - YYYY-MM-DD (standard HTML date input)
+ */
+export function normalizeDateInput(val: string): string {
+  if (!val) return "";
+  const cleaned = val.replace(/\s+/g, "").trim();
+
+  // YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) {
+    return cleaned;
+  }
+
+  // DD-MM-YYYY or DD/MM/YYYY or DD.MM.YYYY
+  const separatorMatch = cleaned.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/);
+  if (separatorMatch) {
+    const [, d, m, y] = separatorMatch;
+    const day = d.padStart(2, "0");
+    const month = m.padStart(2, "0");
+    return `${y}-${month}-${day}`;
+  }
+
+  // DDMMYYYY (8 digits)
+  if (/^\d{8}$/.test(cleaned)) {
+    const day = cleaned.slice(0, 2);
+    const month = cleaned.slice(2, 4);
+    const year = cleaned.slice(4, 8);
+    return `${year}-${month}-${day}`;
+  }
+
+  return val;
+}
+
